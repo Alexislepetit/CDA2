@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+<title>UIMM</title>
+</head>
+<body>
+    <div class="container">
+        </header>
+            <h1>Ajout d'un chantier</h1>
+            <form action="" method="POST" novalidate>
+            {{ form.hidden_tag() }}
+            <p>
+            {{ form.chantier_entreprise_client.label }}<br>
+            {{ form.chantier_entreprise_client(size=16) }}<br>
+            </p>
+            <p>
+            {{ form.chantier_code_affaire.label }}<br>
+            {{ form.chantier_code_affaire(size=16) }}<br>
+            </p>
+            <p>
+                {{ form.chantier_id_usine.label }}<br>
+                {{ form.chantier_id_usine() }}
+            </p>
+            <p>{{ form.submit(class="btn") }}</p>
+            </p>
+            <p><a href="{{ url_for('home') }}"class="btn">Retour</a></p>
+            </form>
+    </header>
+    </body>
+    </html>

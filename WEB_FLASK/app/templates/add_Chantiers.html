@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block sidebar %}
+<li><a href="/view_bdd">Base de données</a></li>
+<li><a href="/create_odm">Création ODM</a></li>
+<li><a href="/view_odm">Consulter ODM</a></li>
+<li><a href="/gestion_user">Gestion utilisateurs</a></li>
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/add_Chantiers.css') }}">
+<h1>Création d'un chantier</h1>
+<form action="{{ url_for('add_Chantiers') }}" method="POST" novalidate>
+  {{ form.hidden_tag() }}
+  <p>
+      {{ form.chantier_id_usine.label }}<br>
+      {{ form.chantier_id_usine(class="form-control") }}
+ </p>
+  <p>
+      {{ form.chantier_entreprise_client.label }}<br>
+      {{ form.chantier_entreprise_client(class="input-field",placeholder="Client", size=16) }}<br>
+  </p>
+  <p>
+      {{ form.chantier_code_affaire.label }}<br>
+      {{ form.chantier_code_affaire(class="input-field", placeholder="Code affaire", size=16) }}<br>
+  </p>
+  <p>
+    {{ form.chantier_contact.label }}<br>
+    {{ form.chantier_contact(class="form-control") }}
+ </p>
+  
+  <p>{{ form.submit(class="btn") }}</p>
+
+</form>
+
+
+
+
+{% endblock %}

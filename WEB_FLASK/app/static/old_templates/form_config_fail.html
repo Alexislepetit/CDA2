@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+<title>UIMM</title>
+</head>
+<body>
+    <div class="container">
+        </header>
+            <h1>Connexion</h1>
+            <form action="" method="POST" novalidate>
+            {{ form.hidden_tag() }}
+            <p>
+            {{ form.user_username.label }}<br>
+            {{ form.user_username(size=16) }}<br>
+            </p>
+            <p>
+            {{ form.user_password.label }}<br>
+            {{ form.user_password(size=16) }}<br>
+            </p>
+            <p>{{ form.submit() }}</p>
+            </p>
+            <r>Mot de passe ou utlisateur erroné</r>
+            </form>
+        </header>
+</body>
+</html>

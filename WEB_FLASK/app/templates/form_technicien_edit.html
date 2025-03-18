@@ -1,0 +1,46 @@
+<!-- templates/form_technicien_edit.html -->
+<p>
+    {{ form.tech_nom.label }}<br>
+    {{ form.tech_nom(class="input-field", placeholder="Nom", size=16) }}
+</p>
+<p>
+    {{ form.tech_prenom.label }}<br>
+    {{ form.tech_prenom(class="input-field", placeholder="Prénom", size=16) }}
+</p>
+<p>
+    {{ form.tech_matricule.label }}<br>
+    {{ form.tech_matricule(class="input-field", placeholder="Matricule", size=16) }}
+</p>
+<p>
+    {{ form.tech_telephone.label }}<br>
+    {{ form.tech_telephone(class="input-field", placeholder="Téléphone", size=16) }}
+</p>
+<p>
+    {{ form.tech_immatriculation.label }}<br>
+    {{ form.tech_immatriculation(class="input-field", placeholder="Immatriculation du véhicule", size=16) }}
+</p>
+<p>
+    {{ form.tech_email.label }}<br>
+    {{ form.tech_email(class="input-field", placeholder="Email", size=16) }}
+</p>
+<p>
+    {{ form.tech_adresse.label }}<br>
+    {{ form.tech_adresse(class="input-field", placeholder="Adresse", size=16) }}
+</p>
+<p>
+    {{ form.tech_ville.label }}<br>
+    {{ form.tech_ville(class="input-field", placeholder="Ville", size=16) }}
+</p>
+<p>
+    {{ form.tech_code_postal.label }}<br>
+    {{ form.tech_code_postal(class="input-field", placeholder="Code postal", size=16) }}
+</p>
+<p>
+    {{ form.tech_charge_affaires.label }}<br>
+    {{ form.tech_charge_affaires(class="form-control") }}
+</p>
+<p>
+    {{ form.tech_agence.label }}<br>
+    {{ form.tech_agence(class="form-control") }}
+</p>
+<p>{{ form.submit(class="btn") }}</p>

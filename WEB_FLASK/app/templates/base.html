@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <title>Consultation des bases de données</title>
+</head>
+
+<div class="sidebar">
+    <img src="{{ url_for('static', filename='image/Logospie.png') }}" alt="Logo SPIE" class="logo">
+    <div class="welcome">
+        <h2>Utilisateur :</h2>
+        <p> Malo</p>
+    </div>
+        <nav>
+            <ul>
+                {% block sidebar %}{% endblock %}
+            </ul>
+            
+        </nav>
+        <div class="logout">
+            <a href="/login" class="logout-btn">
+                Se déconnecter
+            </a>
+        </div>,
+    </div>
+    <div class="main-content">
+        <div class="banner">
+            <img src="{{ url_for('static', filename='image/test_banniere2.jpg') }}" alt="Bannière" class="banner-image">
+        </div>
+        <body>
+        <div class="content">
+            {% block content %}{% endblock %}
+            {% block scripts %}{% endblock %}
+        </div>
+    </div>
+    </body>
+</html>

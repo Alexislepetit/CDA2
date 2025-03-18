@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+<title>UIMM</title>
+</head>
+<body>
+    <div class="container">
+        </header>
+            <h1>Modifier les droits</h1>
+            <form action="" method="POST" novalidate>
+            {{ form.hidden_tag() }}
+            <p>
+            {{ form.user_username.label }}<br>
+            {{ form.user_username(size=16) }}<br>
+            </p>
+            <p>
+            {{ form.droit_admin.label }}<br>
+            {{ form.droit_admin(size=16) }}<br>
+            </p>
+            <p>{{ form.submit() }}</p>
+            </p>
+            <p><a href="//172.31.10.207:5000/fields_admin"class="btn">Retour</a></p>
+            </form>
+    </header>
+    </body>
+    </html>

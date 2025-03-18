@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lovable Accueil</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+  <style>
+    /* Styles spécifiques pour le message flash localisé dans le formulaire */
+    .flashes-local {
+      list-style: none;
+      margin: 10px 0;
+      padding: 0;
+      text-align: center;
+    }
+    .flashes-local li {
+      background-color: #f44336;
+      color: white;
+      padding: 10px;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-box">
+      <img src="{{ url_for('static', filename='image/Logospie.png') }}" alt="SPIE Logo" class="logo">
+      <form action="/login" method="POST" novalidate>
+        {{ form.hidden_tag() }}
+        <div class="input-group">
+          <label for="user_username">{{ form.user_username.label }}</label>
+          {{ form.user_username(class="input-field", id="user_username", placeholder="Utilisateur", size=16) }}
+        </div>
+        <div class="input-group">
+          <label for="user_password">{{ form.user_password.label }}</label>
+          {{ form.user_password(class="input-field", id="user_password", placeholder="Mot de passe", size=16) }}
+        </div>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <ul class="flashes-local">
+              {% for category, message in messages %}
+                <li class="{{ category }}">{{ message }}</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
+        <div class="forgot-password">
+          <a href="#">Mot de passe oublié</a>
+        </div>
+        <div class="button-container">
+          {{ form.submit(class="login-button") }}
+        </div>
+      </form>
+    </div>
+  </div>
+  
+  <script>
+    setTimeout(function(){
+      var flashMessages = document.querySelector('.flashes-local');
+      if(flashMessages){
+        flashMessages.style.display = 'none';
+      }
+    }, 3000); // Le message disparaît après 3 secondes
+  </script>
+</body>
+</html>
+

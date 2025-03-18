@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+    <title>UIMM</title>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Ajout d'un technicien</h1>
+            <form action="" method="POST" novalidate>
+                {{ form.hidden_tag() }}
+                <p>
+                    {{ form.tech_nom.label }}<br>
+                    {{ form.tech_nom(size=16) }}<br>
+                </p>
+                <p>
+                    {{ form.tech_prenom.label }}<br>
+                    {{ form.tech_prenom(size=16) }}<br>
+                </p>
+                <p>
+                    {{ form.tech_matricule.label }}<br>
+                    {{ form.tech_matricule(size=16) }}<br>
+                </p>
+                <p>
+                    {{ form.tech_telephone.label }}<br>
+                    {{ form.tech_telephone(size=16) }}<br>
+                </p>
+                <p>
+                    {{ form.tech_email.label }}<br>
+                    {{ form.tech_email(size=16) }}<br>
+                </p>
+                <p>
+                    {{ form.tech_ville.label }}<br>
+                    {{ form.tech_ville(size=16) }}<br>
+                </p>
+                <p>
+                    {{ form.tech_adresse.label }}<br>
+                    {{ form.tech_adresse(size=16) }}<br>
+                </p>
+                <p>
+                    {{ form.tech_code_postal.label }}<br>
+                    {{ form.tech_code_postal(size=16, type='text', pattern="^[0-9]{5}$", title="Veuillez entrer 5 chiffres.") }}<br>
+                </p>
+                <script>
+                    document.querySelector('input[name="tech_code_postal"]').addEventListener('input', function (e) {
+                        // Supprimer tous les caractères non numériques
+                        this.value = this.value.replace(/[^0-9]/g, '');
+                    });
+                </script>
+                <p>
+                    {{ form.tech_charge_affaires.label }}<br>
+                    {{ form.tech_charge_affaires() }}
+                </p>
+                <p>
+                    {{ form.tech_agence.label }}<br>
+                    {{ form.tech_agence() }}
+                </p>
+                <p>
+                    {{ form.tech_role.label }}<br>
+                    {{ form.tech_role() }}
+                </p>
+                
+                <p>{{ form.submit(class="btn") }}</p>
+                <p><a href="{{ url_for('home') }}" class="btn">Retour</a></p>
+            </form>
+        </header>
+    </div>
+</body>
+</html>

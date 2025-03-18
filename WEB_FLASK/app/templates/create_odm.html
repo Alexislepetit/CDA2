@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block sidebar %}
+<li><a href="/view_bdd">Base de données</a></li>
+<li><a href="/create_odm" class="page-active">Création ODM</a></li>
+<li><a href="/view_odm">Consulter ODM</a></li>
+<li><a href="/gestion_user">Gestion utilisateurs</a></li>
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/create_odm.css') }}">
+
+<h1>Création d'un utilisateur</h1>
+<form action="" method="POST" novalidate>
+    {{ form.hidden_tag() }}
+    <p>
+        <label for="usine_recherche">{{ form.usine_recherche.label }}</label>
+        {{ form.usine_recherche(class="form-control") }}
+    </p>
+
+    <p>
+        <label for="nom_recherche">{{ form.nom_recherche.label }}</label>
+        {{ form.nom_recherche(class="form-control") }}
+    </p>
+
+    <p>
+        <label for="chantier_recherche">{{ form.chantier_recherche.label }}</label>
+        {{ form.chantier_recherche(class="form-control") }}
+    </p>
+
+    <p>
+        <label for="date_debut">{{ form.date_debut.label }}</label>
+        {{ form.date_debut(class="form-control", type="date") }}
+    </p>
+
+    <p>
+        <label for="date_fin">{{ form.date_fin.label }}</label>
+        {{ form.date_fin(class="form-control", type="date") }}
+    </p>
+
+    <p>
+        <label for="mission">{{ form.mission.label }}</label> 
+        {{ form.mission(class="form-mission") }} 
+    </p>
+
+    <p>
+        {{ form.submit(class="btn") }}
+    </p>
+</form>
+
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const usineSelect = document.getElementById('usine_recherche');
+    const chantierSelect = document.getElementById('chantier_recherche');
+
+    // Initialiser les champs de date avec la date d'aujourd'hui
+    const dateInputs = document.querySelectorAll('input[type="date"]');
+    const today = new Date().toISOString().split('T')[0];
+    dateInputs.forEach(input => {
+        input.min = today;  // Empêche la sélection de dates passées
+    });
+
+    usineSelect.addEventListener('change', function(event) {
+        const selectedUsine = this.value;
+        
+        // Prevent form submission
+        event.preventDefault();
+        
+        // Fetch chantiers for selected usine
+        fetch(`/get_chantiers/${encodeURIComponent(selectedUsine)}`)
+            .then(response => response.json())
+            .then(data => {
+                // Clear existing options
+                chantierSelect.innerHTML = '';
+                
+                // Add new options
+                data.chantiers.forEach(chantier => {
+                    const option = document.createElement('option');
+                    option.value = chantier;
+                    option.textContent = chantier;
+                    chantierSelect.appendChild(option);
+                });
+            })
+            .catch(error => console.error('Error:', error));
+    });
+});
+</script>
+{% endblock %}

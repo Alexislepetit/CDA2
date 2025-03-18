@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block sidebar %}
+<li><a href="/view_bdd">Base de données</a></li>
+<li><a href="/create_odm">Création ODM</a></li>
+<li><a href="/view_odm">Consulter ODM</a></li>
+<li><a href="/gestion_user">Gestion utilisateurs</a></li>
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/add_Agences.css') }}">
+<h1>Création d'une agence Spie</h1>
+
+<form action="{{ url_for('add_Agences') }}" method="POST" novalidate>
+  {{ form.hidden_tag() }}
+  <p>
+      {{ form.agence_ville.label }}<br>
+      {{ form.agence_ville(class="input-field",placeholder="Ville", size=16) }}<br>
+  
+  <p>{{ form.submit(class="btn") }}</p>
+
+</form>
+{% endblock %}

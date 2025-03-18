@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block sidebar %}
+<li><a href="/view_bdd" >Base de données</a></li>
+<li><a href="/create_odm">Création ODM</a></li>
+<li><a href="/view_odm">Consulter ODM</a></li>
+<li><a href="/gestion_user">Gestion utilisateurs</a></li>
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/edit_item.css') }}">
+<h2>Modifier l'Agence</h2>
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        
+        <div>
+            {{ form.agence_nom.label }} {{ form.agence_nom() }}
+        </div>
+        <div>
+            {{ form.agence_ville.label }} {{ form.agence_ville() }}
+        </div>
+        <div>
+            {{ form.agence_adresse.label }} {{ form.agence_adresse() }}
+        </div>
+        <div>
+            {{ form.agence_code_postal.label }} {{ form.agence_code_postal() }}
+        </div>
+        
+        <button type="submit">Enregistrer les modifications</button>
+    </form>
+{% endblock %}

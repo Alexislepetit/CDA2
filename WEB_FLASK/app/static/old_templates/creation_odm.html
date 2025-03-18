@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <title>Outil ODM Spie</title>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo-container">
+                <img src="{{ url_for('static', filename='Logospie.png') }}" alt="UIMM Bretagne" class="logo">
+            </div>
+            <h1>Création Ordre de Mission</h1>
+            <p class="subtitle">Département Tenwhil</p>
+        </header>
+
+        <section class="welcome-section">
+            <form action="" method="POST" novalidate>
+                {{ form.hidden_tag() }}
+                <p>
+                    <label for="usine_recherche">{{ form.usine_recherche.label }}</label>
+                    {{ form.usine_recherche(class="form-control") }}
+                </p>
+
+                <p>
+                    <label for="nom_recherche">{{ form.nom_recherche.label }}</label>
+                    {{ form.nom_recherche(class="form-control") }}
+                </p>
+
+                <p>
+                    {{ form.submit(class="btn") }}
+                </p>
+            </form>
+
+            <p><a href="{{ url_for('home') }}"class="btn">Retour</a></p>
+        </section>
+    </div>
+</body>
+</html>

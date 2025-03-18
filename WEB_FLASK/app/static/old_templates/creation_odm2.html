@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <title>Outil ODM Spie</title>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo-container">
+                <img src="{{ url_for('static', filename='Logospie.png') }}" alt="UIMM Bretagne" class="logo">
+            </div>
+            <h1>Création ordre de mission</h1>
+            <p class="subtitle">Département Tenwhil</p>
+        </header>
+        
+        <section class="welcome-section">
+            <form action="" method="POST" novalidate>
+                {{ form.hidden_tag() }}
+                <p>Lieu du chantier : {{ usine }}</p>
+                <p>Technicien : {{ prenom }} {{ nom }}  </p>
+
+                <p>
+                    <label for="chantier_recherche">{{ form.chantier_recherche.label }}</label>
+                    {{ form.chantier_recherche(class="form-control") }}
+                </p>
+
+                <p>
+                    <label for="date_debut">{{ form.date_debut.label }}</label>
+                    {{ form.date_debut(class="form-control") }}
+                </p>
+
+                <p>
+                    <label for="date_fin">{{ form.date_fin.label }}</label>
+                    {{ form.date_fin(class="form-control") }}
+                </p>
+
+                <p>
+                    <label for="mission">{{ form.mission.label }}</label> 
+                    {{ form.mission(class="form-control") }} 
+                </p>
+
+                <p>
+                    <button type="submit" class="btn submit-button">Générer l'ODM</button>
+                </p>
+            </form>
+
+            <p><a href="{{ url_for('home') }}"class="btn">Retour</a></p>
+        </section>
+    </div>
+</body>
+</html>

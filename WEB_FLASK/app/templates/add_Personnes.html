@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block sidebar %}
+<li><a href="/view_bdd">Base de données</a></li>
+<li><a href="/create_odm">Création ODM</a></li>
+<li><a href="/view_odm">Consulter ODM</a></li>
+<li><a href="/gestion_user">Gestion utilisateurs</a></li>
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/add_Personnes.css') }}">
+<h1>Création d'une personne</h1>
+
+<!-- Formulaire de sélection -->
+<form method="POST" id="selection_form">
+    <select name="choix" onchange="this.form.submit()">
+        <option value="" {% if not selection %}selected{% endif %}>-- Sélectionnez une option --</option>
+        <option value="technicien" {% if selection == 'technicien' %}selected{% endif %}>Technicien</option>
+        <option value="charge_affaires" {% if selection == 'charge_affaires' %}selected{% endif %}>Chargé d'affaires</option>
+        <option value="client" {% if selection == 'client' %}selected{% endif %}>Client</option>
+        <option value="contact_spie" {% if selection == 'contact_spie' %}selected{% endif %}>Contact Spie</option>
+    </select>
+</form>
+
+<!-- Formulaire des détails -->
+{% if selection %}
+<form method="POST" id="detail_form">
+    {{ form.hidden_tag() }}
+    <input type="hidden" name="choix" value="{{ selection }}">
+    
+    {% if selection == "technicien" %}
+        {% include "form_technicien.html" %}
+    {% elif selection == "charge_affaires" %}
+        {% include "form_charge_affaires.html" %}
+    {% elif selection == "client" %}
+        {% include "form_client.html" %}
+    {% elif selection == "contact_spie" %}
+        {% include "form_contact_spie.html" %}
+    {% endif %}
+</form>
+{% endif %}
+{% endblock %}

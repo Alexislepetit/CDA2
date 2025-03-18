@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block sidebar %}
+<li><a href="/view_bdd">Base de données</a></li>
+<li><a href="/create_odm">Création ODM</a></li>
+<li><a href="/view_odm">Consulter ODM</a></li>
+<li><a href="/gestion_user">Gestion utilisateurs</a></li>
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/add_Usines.css') }}">
+<h1>Création d'une usine</h1>
+
+<form action="{{ url_for('add_Usines') }}" method="POST" novalidate>
+  {{ form.hidden_tag() }}
+  <p>
+      {{ form.usine_entreprise.label }}<br>
+      {{ form.usine_entreprise(class="input-field",placeholder="Entreprise", size=16) }}<br>
+  </p>
+  <p>
+      {{ form.usine_adresse.label }}<br>
+      {{ form.usine_adresse(class="input-field", placeholder="Adresse", size=16) }}<br>
+  </p>
+  <p>
+      {{ form.usine_code_postal.label }}<br>
+      {{ form.usine_code_postal(class="input-field",placeholder="Code postal", size=16) }}<br>
+  </p>
+  <p>
+      {{ form.usine_ville.label }}<br>
+      {{ form.usine_ville(class="input-field", placeholder="Ville", size=16) }}<br>
+  </p>
+
+  
+  <p>{{ form.submit(class="btn") }}</p>
+
+</form>
+
+
+{% endblock %}

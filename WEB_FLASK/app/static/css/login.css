@@ -1,0 +1,154 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  height: 100vh;
+  background: url('../image/bg_accueil.jpg') no-repeat center center fixed;
+  background-size: cover;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-container {
+  display: flex;
+  justify-content: center;  /* Centre horizontalement */
+  align-items: center;      /* Centre verticalement */
+  height: 100vh;            /* Occupe toute la hauteur de la fenêtre */
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.login-box {
+  background-color: #1a237e;
+  padding: 30px;
+  border-radius: 50px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+  border: 6px solid white;
+  width: 600px;             /* Vous pouvez ajuster la largeur */
+  margin: 0 auto;           /* Centre horizontalement si nécessaire */
+}
+
+.input-group {
+  margin-bottom: 50px;
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 5px;
+  background-color: rgba(255, 255, 255, 0.9);
+  font-size: 16px;
+}
+
+input::placeholder {
+  color: #666;
+}
+
+.forgot-password {
+  text-align: left;
+  margin-bottom: 25px;
+}
+
+.forgot-password a {
+  color: white;
+  text-decoration: none;
+  font-size: 25px;
+}
+
+/* Style pour le bouton submit généré par Flask */
+button[type="submit"] input[type="submit"],
+.login-button {
+  width: 200px;
+  padding: 15px;
+  background-color: white;
+  color: #1a237e;
+  border: none;
+  border-radius: 20px;
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  display: block;
+  margin: 0 auto;  /* Centre le bouton */
+}
+
+button[type="submit"]:hover input[type="submit"]:hover,
+.login-button:hover {
+  background-color: #f5f5f5;
+}
+
+label {
+  color: white;
+  font-size: 25px;
+  font-weight: bold;
+}
+
+.logo {
+  width: 150px; /* Taille originale du logo */
+  height: 150px;
+  background-color: white; /* Fond blanc autour du logo */
+  border-radius: 50%; /* Rend le contour circulaire */
+  padding: 0px; /* Crée un espace blanc autour du logo */
+  display: block;
+  margin: 0 auto 50px;
+  object-fit: scale-down; /* Empêche l'image d'être coupée */
+}
+
+.button-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+input[type="submit"] {
+    width: 200px;
+    padding: 15px;
+    background-color: white;
+    color: #1a237e;
+    border: none;
+    border-radius: 20px;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+input[type="submit"]:hover {
+    background-color: #f5f5f5;
+}
+
+.flashes {
+  position: fixed;           /* Positionné par rapport à la fenêtre */
+  top: 20px;                 /* À 20px du haut */
+  left: 50%;                 /* Centré horizontalement */
+  transform: translateX(-50%);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  z-index: 1000;             /* Toujours visible au-dessus des autres éléments */
+  text-align: center;
+}
+
+.flashes li {
+  display: inline-block;     /* Pour que le background s'adapte au contenu */
+  background-color: #f44336; /* Couleur d'erreur (rouge) par exemple */
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-size: 18px;
+}
+
+.flashes li.error {
+  color: red;
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+

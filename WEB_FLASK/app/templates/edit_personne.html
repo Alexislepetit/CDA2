@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block sidebar %}
+<li><a href="/view_bdd">Base de données</a></li>
+<li><a href="/create_odm">Création ODM</a></li>
+<li><a href="/view_odm">Consulter ODM</a></li>
+<li><a href="/gestion_user">Gestion utilisateurs</a></li>
+{% endblock %}
+
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/edit_item.css') }}">
+<h1>Modification d'une personne</h1>
+
+<!-- Afficher les messages flash -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+<!-- Formulaire des détails -->
+{% if selection %}
+<form method="POST" id="detail_form">
+    {{ form.hidden_tag() }}
+    <input type="hidden" name="choix" value="{{ selection }}">
+    
+    {% if selection == "technicien" %}
+        {% include "form_technicien_edit.html" %}
+    {% elif selection == "charge_affaires" %}
+        {% include "form_charge_affaires_edit.html" %}
+    {% elif selection == "client" %}
+        {% include "form_client_edit.html" %}
+    {% elif selection == "contact_spie" %}
+        {% include "form_contact_spie_edit.html" %}
+    {% endif %}
+
+    <div class="form-footer">
+        <button type="submit" class="btn-save">Enregistrer</button>
+        <a class="btn" href="{{ url_for('view_bdd') }}" class="btn-cancel">Retour</a>
+    </div>
+</form>
+{% endif %}
+{% endblock %}

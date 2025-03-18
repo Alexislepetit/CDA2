@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+    <title>UIMM</title>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Ajout d'un utilisateur</h1>
+        </header>
+        <form action="{{ url_for('add_user') }}" method="POST" novalidate>
+            {{ form.hidden_tag() }}
+            <p>
+                {{ form.user_utilisateur.label }}<br>
+                {{ form.user_utilisateur(size=16) }}<br>
+            </p>
+            <p>
+                {{ form.user_password.label }}<br>
+                {{ form.user_password(size=16) }}<br>
+            </p>
+            <p>
+                {{ form.user_password2.label }}<br>
+                {{ form.user_password2(size=16) }}<br>
+            </p>
+            {% if not form.user_password.data == form.user_password2.data and form.user_password2.data %}
+                <p style="color: red;">Les mots de passe ne correspondent pas.</p>
+            {% endif %}
+            <p>{{ form.submit(class="btn") }}</p>
+            <p><a href="{{ url_for('home') }}" class="btn">Retour</a></p>
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <title>Outil ODM Spie</title>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo-container">
+                <img src="{{ url_for('static', filename='Logospie.png') }}" alt="UIMM Bretagne" class="logo">
+            </div>
+            <h1>Création Ordre de Mission</h1>
+            <p class="subtitle">Département Tenwhil</p>
+        </header>
+
+        <section class="welcome-section">
+            <a href="{{ url_for('ODM') }}" class="btn">Créer un ordre de mission</a>
+
+            <a href="{{ url_for('add_technicien') }}" class="btn">Ajouter un technicien</a>
+
+            <a href="{{ url_for('add_chantier') }}" class="btn">Ajouter un client</a>
+
+            <a href="{{ url_for('add_user') }}" class="btn">Ajouter un utilisateur</a>
+
+            <a href="{{ url_for('home_tableau') }}" class="btn">Contenu des bases de données</a>
+
+            <a href="/login" class="btn">Se déconnecter</a>
+        </section>
+    </div>
+</body>
+</html>

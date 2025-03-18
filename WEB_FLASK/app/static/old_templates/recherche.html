@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <title>Outil ODM Spie</title>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>
+                <img src="{{url_for('static', filename='LogoUIMM.png')}}" alt="UIMM Bretagne" class="logo">
+                Usine du futur : Ligne 4.0
+            </h1>
+            <p class="subtitle">Ligne Production Vitré</p>
+        </header>
+        
+        <section class="welcome-section">
+            <p>Bienvenue, Admin : <strong>{{user}}</strong></p>
+            <p>Resultat : <strong>{{result}}</strong></p>
+            <a href="/login" class="btn">Se déconnecter</a>
+            <br>
+            <br>
+            <a href="{{ url_for('Recherche') }}" class="btn">Faire une nouvelle recherche</a>
+        </section>
+    </div>
+</body>
+</html>
