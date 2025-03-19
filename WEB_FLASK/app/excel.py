@@ -17,7 +17,7 @@ class Excel:
     def __init__(self):
         pass
     
-    def Comp_Excel(self, nom_data, prenom_data, usine_data, client_data, contact_data,telephone_contact_data, email_contact, debut_data, fin_data, matricule_data, charge_data, adresse_data, mail_charge_data, telephone_charge_data, affaire_data, adresse_usine_data, mission_data, immatriculation_data):
+    def Comp_Excel(self, nom_data, prenom_data, usine_data, client_data, contact_data,telephone_contact_data, email_contact, debut_data, fin_data, matricule_data, charge_data, adresse_data, mail_charge_data, telephone_charge_data, affaire_data, adresse_usine_data, mission_data, immatriculation_data, zone_data):
         """Rempli le excel et le convertis en PDF"""
         self.nom(nom_data, prenom_data)
         #self.prenom(prenom_data)
@@ -32,6 +32,7 @@ class Excel:
         self.mission(mission_data)
         self.info_charge(telephone_charge_data, mail_charge_data)
         self.immatriculation(immatriculation_data)
+        self.zone(zone_data)
         self.date()
         
 
@@ -259,6 +260,20 @@ class Excel:
 
         # Écriture de la data dans la cellule
         sheet["N34"] = data_immatriculation
+
+        # Sauvegarder les modifications dans le fichier
+        excel.save(file_path)
+
+    def zone(self, data_zone):
+        # Charger le fichier Excel
+        file_path = os.path.abspath("app/formulaire.xlsx")
+        excel = openpyxl.load_workbook(file_path)
+
+        # Sélectionner la feuille active
+        sheet = excel.active
+
+        # Écriture de la data dans la cellule
+        sheet["P20"] = data_zone
 
         # Sauvegarder les modifications dans le fichier
         excel.save(file_path)

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calcul de distance à vol d'oiseau</title>
+</head>
+<body>
+    <h1>Calcul de distance entre deux adresses</h1>
+    <form method="POST">
+        <label for="adresse1">Adresse 1 :</label>
+        <input type="text" name="adresse1" id="adresse1" required><br><br>
+    
+        <label for="adresse2">Adresse 2 :</label>
+        <input type="text" name="adresse2" id="adresse2" required><br><br>
+    
+        <button type="submit">Calculer la distance</button>
+    </form>
+
+    {% if distance %}
+        <p>La distance entre {{ adresse1 }} et {{ adresse2 }} est de {{ distance }} km.</p>
+    {% elif erreur %}
+        <p>{{ erreur }}</p>
+    {% endif %}
+</body>
+</html>

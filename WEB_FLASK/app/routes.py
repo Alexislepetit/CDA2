@@ -1,4 +1,5 @@
-from flask import render_template, request, redirect, url_for, session, send_file, flash, jsonify
+from flask import render_template, request, redirect, url_for, session, send_file, flash, jsonify, request
+import requests
 from flask_login import LoginManager
 from app import app
 from app.forms import *
@@ -6,9 +7,8 @@ from app.requete import Requete_BDD
 from app.excel import Excel
 from datetime import datetime
 import os
+from app.gps import class_gps
 
-#BDD = Requete_BDD()
-#BDD.connexion()
 
 @app.route('/', methods=['GET', 'POST'])
 def redirect_login():
@@ -285,6 +285,7 @@ def edit_item(type, id):
                 form.tech_charge_affaires.data = data[9]  # charge_affaires (colonne 9)
                 form.tech_email.data = data[10]       # email (colonne 10)
                 form.tech_agence.data = ville_agence # id_agence (colonne 12)
+                
 
             elif selection == "charge_affaires":
                 form.charge_nom.data = data[1]          # nom (colonne 1)
@@ -333,7 +334,7 @@ def edit_item(type, id):
             form.usine_code_postal.data = data[3]
             form.usine_ville.data = data[4]
             
-    elif type == "Agences":
+    elif type == "Agences": 
         data = bdd.get_agence_by_id(id)
         form = ConfigFormnewAgence()
         template = 'edit_agence.html'
@@ -355,6 +356,7 @@ def edit_item(type, id):
             if selection == "client":
                 bdd.update_client(id, form)
             if selection == "contact_spie":
+                print
                 bdd.update_contact(id, form)
         elif type == "Chantiers":
             bdd.update_chantier(id, form)
@@ -406,6 +408,7 @@ def create_odm():
     
     BDD = Requete_BDD()
     form = Recherche_BDD_ODM()
+    gps = class_gps()
 
     # Récupérer la liste des noms et prénoms
     liste_nom_complet = BDD.liste_nom_complet()
@@ -435,7 +438,9 @@ def create_odm():
         prenom = BDD.liste_prenom(nom)
         matricule = BDD.matricule(nom)
         immatriculation=BDD.immatriculation(nom)
+        ville=BDD.ville(matricule)
         charge = BDD.charge(nom)
+
         id_usine = BDD.id_usine(usine_entreprise, usine_ville)
         
         nom_charge = charge
@@ -463,7 +468,11 @@ def create_odm():
         contact=BDD.nom_contact(id_personne_client)
         telephone_contact=BDD.telephone_contact(id_personne_client)
         email_contact=BDD.email_contact(id_personne_client)
-        
+
+        #calcul de la zone de déplacement
+        distance = gps.calculate_distance(usine_ville, ville)
+        zone=gps.calcul_zone(distance)
+
         # Stockage dans la session
         session['usine_entreprise'] = usine_entreprise
         session['usine_ville'] = usine_ville
@@ -489,6 +498,8 @@ def create_odm():
         session['mission'] = mission
         session['telephone_contact'] = telephone_contact
         session['email_contact'] = email_contact
+        session['zone'] = zone
+
 
         return redirect(url_for('download_pdf'))
     
@@ -607,7 +618,7 @@ def download_pdf():
             session['date_debut'], session['date_fin'], session['matricule'], 
             session['charge'], session['adresse'], session['mail_charge'], 
             session['telephone_charge'], session['affaire'], session['adresse_usine'], 
-            session['mission'], session['immatriculation']
+            session['mission'], session['immatriculation'], session['zone']
         )
 
         # Conversion en PDF
@@ -647,3 +658,27 @@ def droits():
 def maquette():
 
     return render_template('maquette.html')
+
+@app.route("/gps", methods=["GET", "POST"])
+def gps():
+    gps = class_gps()
+    if request.method == "POST":
+        print(f"Request method: {request.method}")  # Vérifier la méthode de la requête
+        adresse1 = request.form.get("adresse1")  # Utiliser .get() pour éviter le KeyError
+        adresse2 = request.form.get("adresse2")  # Utiliser .get() pour éviter le KeyError
+        
+        if not adresse1 or not adresse2:
+            print("Erreur: Adresse manquante")
+            return render_template("gps.html", erreur="Les deux adresses doivent être remplies.")
+        
+        print(f"Adresse 1 : {adresse1}, Adresse 2 : {adresse2}")
+        
+        # Appel de la fonction calculate_distance pour récupérer la distance entre les deux adresses
+        distance = gps.calculate_distance(adresse1, adresse2)
+        
+        if distance is not None:
+            return render_template("gps.html", adresse1=adresse1, adresse2=adresse2, distance=distance)
+        else:
+            return render_template("gps.html", adresse1=adresse1, adresse2=adresse2, erreur="Impossible de calculer la distance.")
+    
+    return render_template("gps.html")  # Rend le formulaire si la méthode est GET

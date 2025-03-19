@@ -665,7 +665,19 @@ class Requete_BDD:
         # Récupérer le premier résultat
         liste_immatriculation = self.mycursor.fetchone()
 
-        return liste_immatriculation[0]    
+        return liste_immatriculation[0]
+
+    def ville(self, matricule):
+        self.connexion()
+        
+        self.mycursor = self.mydb.cursor()
+        self.mycursor.execute("USE ODM")
+        self.mycursor.execute("SELECT ville FROM personnes WHERE matricule = %s", (matricule,))
+
+        # Récupérer le premier résultat
+        liste_ville = self.mycursor.fetchone()
+
+        return liste_ville[0]    
     
     def charge(self, nom):
         self.connexion()
