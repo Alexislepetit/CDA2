@@ -58,9 +58,9 @@ h1 {
 }
 
 table {
-  width: auto; /* Permet au tableau de s'adapter au contenu */
-  table-layout: auto; /* Laisse les colonnes s'adapter au contenu */
-  border-collapse: collapse;
+  width: 100%; /* Prend toute la largeur de la page */
+  border-collapse: collapse; /* Pour que les bordures soient collées */
+  font-size: 18px; /* Augmenter la taille de la police */
 }
 
 th, td {
@@ -72,6 +72,11 @@ th, td {
 
 thead {
   background-color: #f5f5f5;
+}
+
+td:last-child {
+  text-align: center; /* Centrer horizontalement le contenu de la dernière colonne */
+  vertical-align: middle; /* Centrer verticalement */
 }
 .delete-btn {
   background-color: #e53935; /* Rouge pour l'action de suppression */

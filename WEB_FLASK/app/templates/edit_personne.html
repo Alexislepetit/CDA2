@@ -7,7 +7,6 @@
 <li><a href="/gestion_user">Gestion utilisateurs</a></li>
 {% endblock %}
 
-
 {% block content %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/edit_item.css') }}">
 <h1>Modification d'une personne</h1>
@@ -23,9 +22,8 @@
 
 <!-- Formulaire des détails -->
 {% if selection %}
-<form method="POST" id="detail_form">
+<form method="POST">
     {{ form.hidden_tag() }}
-    <input type="hidden" name="choix" value="{{ selection }}">
     
     {% if selection == "technicien" %}
         {% include "form_technicien_edit.html" %}
@@ -37,10 +35,11 @@
         {% include "form_contact_spie_edit.html" %}
     {% endif %}
 
-    <div class="form-footer">
-        <button type="submit" class="btn-save">Enregistrer</button>
-        <a class="btn" href="{{ url_for('view_bdd') }}" class="btn-cancel">Retour</a>
+    <div class="form-buttons">
+        <a href="{{ url_for('view_bdd') }}" class="btn"> Retour</a>
+        <button type="submit" class="btn"> Valider</button>
     </div>
+
 </form>
 {% endif %}
 {% endblock %}

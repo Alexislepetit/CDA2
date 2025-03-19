@@ -12,20 +12,12 @@
 <h2>Modifier l'Agence</h2>
     <form method="POST">
         {{ form.hidden_tag() }}
-        
-        <div>
-            {{ form.agence_nom.label }} {{ form.agence_nom() }}
-        </div>
         <div>
             {{ form.agence_ville.label }} {{ form.agence_ville() }}
         </div>
-        <div>
-            {{ form.agence_adresse.label }} {{ form.agence_adresse() }}
+        <div class="form-buttons">
+            <a href="{{ url_for('view_bdd') }}" class="btn"> Retour</a>
+            <button type="submit" class="btn"> Valider</button>
         </div>
-        <div>
-            {{ form.agence_code_postal.label }} {{ form.agence_code_postal() }}
-        </div>
-        
-        <button type="submit">Enregistrer les modifications</button>
     </form>
 {% endblock %}

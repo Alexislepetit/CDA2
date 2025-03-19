@@ -14,7 +14,7 @@
         {{ form.hidden_tag() }}
         
         <div>
-            {{ form.usine_nom.label }} {{ form.usine_nom() }}
+            {{ form.usine_entreprise.label }} {{ form.usine_entreprise() }}
         </div>
         <div>
             {{ form.usine_adresse.label }} {{ form.usine_adresse() }}
@@ -26,6 +26,9 @@
             {{ form.usine_ville.label }} {{ form.usine_ville() }}
         </div>
         
-        <button type="submit">Enregistrer les modifications</button>
+        <div class="form-buttons">
+            <a href="{{ url_for('view_bdd') }}" class="btn"> Retour</a>
+            <button type="submit" class="btn"> Valider</button>
+        </div>
     </form>
 {% endblock %}

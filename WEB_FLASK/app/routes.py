@@ -231,6 +231,8 @@ def edit_item(type, id):
         # Récupérer les données de la personne
         data = bdd.get_personne_by_id(id)
         
+
+        
         # Déterminer le type de personne à partir du rôle
         if data:
             role_id = data[11]
@@ -240,17 +242,19 @@ def edit_item(type, id):
                 selection = "technicien"
                 form = ConfigFormnewTech()
                 form.tech_agence.choices = bdd.liste_agence()
+                ville_agence=bdd.get_ville_agence_by_id(data[12])
                 form.tech_charge_affaires.choices = bdd.liste_charge()
             elif role_id == 2:
                 selection = "charge_affaires"
                 form = ConfigFormnewCharge()
                 form.charge_agence.choices = bdd.liste_agence()
+                ville_agence=bdd.get_ville_agence_by_id(data[12])
             elif role_id == 3:
                 selection = "client"
-                form = ConfigFormnewClient()  # Assurez-vous d'avoir cette classe
+                form = ConfigFormnewClient() 
             elif role_id == 4:
                 selection = "contact_spie"
-                form = ConfigFormnewContactSpie()  # Assurez-vous d'avoir cette classe
+                form = ConfigFormnewContactSpie()  
             else:
                 flash("Type de personne invalide", "danger")
                 return redirect(url_for('view_bdd'))
@@ -263,8 +267,6 @@ def edit_item(type, id):
         # Si nous recevons un choix du formulaire de sélection
         if "choix" in request.form:
             selection = request.form["choix"]
-            print(selection)
-            print(selection)
             # Rediriger pour réinitialiser le formulaire avec le nouveau choix
             return redirect(url_for('edit_item', type=type, id=id))
             
@@ -282,7 +284,7 @@ def edit_item(type, id):
                 form.tech_ville.data = data[8]        # ville (colonne 8)
                 form.tech_charge_affaires.data = data[9]  # charge_affaires (colonne 9)
                 form.tech_email.data = data[10]       # email (colonne 10)
-                form.tech_agence.data = data[12] # id_agence (colonne 12)
+                form.tech_agence.data = ville_agence # id_agence (colonne 12)
 
             elif selection == "charge_affaires":
                 form.charge_nom.data = data[1]          # nom (colonne 1)
@@ -294,7 +296,7 @@ def edit_item(type, id):
                 form.charge_code_postal.data = data[7]  # code_postal (colonne 7)
                 form.charge_ville.data = data[8]        # ville (colonne 8)
                 form.charge_email.data = data[10]       # email (colonne 10)
-                form.charge_agence.data = data[12] # id_agence (colonne 12)
+                form.charge_agence.data = ville_agence # id_agence (colonne 12)
 
             elif selection == "client":
                 form.client_nom.data = data[1]          # nom (colonne 1)
@@ -311,13 +313,14 @@ def edit_item(type, id):
     elif type == "Chantiers":
         data = bdd.get_chantier_by_id(id)
         form = ConfigFormnewChantier()
+        form.chantier_id_usine.choices = bdd.liste_usine()
+        form.chantier_contact.choices = bdd.liste_contact()
         template = 'edit_chantier.html'
         
         if data and request.method == 'GET':
             form.chantier_entreprise_client.data = data[1]
             form.chantier_code_affaire.data = data[2]
-            form.chantier_id_usine.data = str(data[3])
-            form.chantier_contact.data = str(data[4])
+            form.chantier_id_usine.data = data[3]
             
     elif type == "Usines":
         data = bdd.get_usine_by_id(id)
@@ -344,19 +347,30 @@ def edit_item(type, id):
     
     # Si le formulaire est soumis et valide
     if form.validate_on_submit():
-        print("1111111111111")
         if type == "Personnes":
-            bdd.update_personne(id, form)
+            if selection == "technicien":
+                bdd.update_technicien(id, form)
+            if selection == "charge_affaires":
+                bdd.update_charge(id, form)
+            if selection == "client":
+                bdd.update_client(id, form)
+            if selection == "contact_spie":
+                bdd.update_contact(id, form)
         elif type == "Chantiers":
             bdd.update_chantier(id, form)
+            bdd.update_affecter(id, form)
         elif type == "Usines":
             bdd.update_usine(id, form)
         elif type == "Agences":
             bdd.update_agence(id, form)
-        
         flash("Modification enregistrée", "success")
         return redirect(url_for('view_bdd'))
-    
+    else:
+        if request.method == 'POST':  # Afficher l'erreur uniquement si le formulaire a été soumis
+            print("Erreur de validation :", form.errors)
+            flash("Erreur de validation du formulaire", "danger")  # Message d'erreur
+        
+        
     # Rendre le template approprié
     return render_template(template, form=form, type=type, selection=selection)
 

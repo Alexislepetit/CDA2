@@ -26,7 +26,10 @@
             {{ form.chantier_contact.label }} {{ form.chantier_contact() }}
         </div>
         
-        <button type="submit">Enregistrer les modifications</button>
+        <div class="form-buttons">
+            <a href="{{ url_for('view_bdd') }}" class="btn"> Retour</a>
+            <button type="submit" class="btn"> Valider</button>
+        </div>
     </form>
 {% endblock %}
 

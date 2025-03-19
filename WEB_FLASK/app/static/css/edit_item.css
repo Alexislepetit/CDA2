@@ -64,29 +64,54 @@ input[type="text"]:focus, input[type="password"]:focus, select:focus {
 
 }
 /* Boutons */
-.btn {
-  background-color: #000033;
-  color: white;
-  padding: 12px 24px;
-  font-size: 24px;
-  font-weight: bold;
-  border: none;
-  border-radius: 20px;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.3s ease;
-  width: 100%;
+.form-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px; /* Ajoute un espace entre les boutons */
+  width: 90%;
+  margin: 20px auto 0; /* Centre horizontalement */
 }
 
-.btn:hover {
+.btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 20px;
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center;
+  cursor: pointer;
+  text-decoration: none;
+  transition: 0.3s ease-in-out;
+  display: inline-block;
+  text-align: center;
+}
+
+/* Bouton Retour */
+.btn:first-child {
+  background-color: #6c757d;
+  color: white;
+}
+
+.btn:first-child:hover {
+  background-color: #5a6268;
+}
+
+/* Bouton Valider */
+.btn:last-child {
+  background-color: #000033;
+  color: white;
+  border: none;
+}
+
+.btn:last-child:hover {
   background-color: #0056b3;
   transform: scale(1.05);
 }
 
-
-
+/* Messages d'erreur */
 .error {
-  display: inline-block;     /* Pour que le background s'adapte au contenu */
-  background-color: #f44336; 
+  display: inline-block; /* Pour que le background s'adapte au contenu */
+  background-color: #f44336;
   color: #fff;
   padding: 10px 20px;
   border-radius: 5px;

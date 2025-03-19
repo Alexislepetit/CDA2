@@ -1,18 +1,13 @@
-<!-- templates/form_contact_spie_edit.html -->
-<p>
-    {{ form.contactspie_nom.label }}<br>
-    {{ form.contactspie_nom(class="input-field", placeholder="Nom", size=16) }}
-</p>
-<p>
-    {{ form.contactspie_prenom.label }}<br>
-    {{ form.contactspie_prenom(class="input-field", placeholder="Prénom", size=16) }}
-</p>
-<p>
-    {{ form.contactspie_telephone.label }}<br>
-    {{ form.contactspie_telephone(class="input-field", placeholder="Téléphone", size=16) }}
-</p>
-<p>
-    {{ form.contactspie_email.label }}<br>
-    {{ form.contactspie_email(class="input-field", placeholder="Email", size=16) }}
-</p>
-<p>{{ form.submit(class="btn") }}</p>
+<div>
+    {{ form.contactspie_nom.label }} {{ form.contactspie_nom() }}
+</div>
+<div>
+    {{ form.contactspie_prenom.label }} {{ form.contactspie_prenom() }}
+</div>
+<div>
+    {{ form.contactspie_telephone.label }} {{ form.contactspie_telephone() }}
+</div>
+<div>
+    {{ form.contactspie_email.label }} {{ form.contactspie_email() }}
+</div>
+

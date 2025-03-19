@@ -1,42 +1,31 @@
-<!-- templates/form_charge_affaires_edit.html -->
-<p>
-    {{ form.charge_nom.label }}<br>
-    {{ form.charge_nom(class="input-field", placeholder="Nom", size=16) }}
-</p>
-<p>
-    {{ form.charge_prenom.label }}<br>
-    {{ form.charge_prenom(class="input-field", placeholder="Prénom", size=16) }}
-</p>
-<p>
-    {{ form.charge_matricule.label }}<br>
-    {{ form.charge_matricule(class="input-field", placeholder="Matricule", size=16) }}
-</p>
-<p>
-    {{ form.charge_telephone.label }}<br>
-    {{ form.charge_telephone(class="input-field", placeholder="Téléphone", size=16) }}
-</p>
-<p>
-    {{ form.charge_immatriculation.label }}<br>
-    {{ form.charge_immatriculation(class="input-field", placeholder="Immatriculation", size=16) }}
-</p>
-<p>
-    {{ form.charge_email.label }}<br>
-    {{ form.charge_email(class="input-field", placeholder="Email", size=16) }}
-</p>
-<p>
-    {{ form.charge_adresse.label }}<br>
-    {{ form.charge_adresse(class="input-field", placeholder="Adresse", size=16) }}
-</p>
-<p>
-    {{ form.charge_ville.label }}<br>
-    {{ form.charge_ville(class="input-field", placeholder="Ville", size=16) }}
-</p>
-<p>
-    {{ form.charge_code_postal.label }}<br>
-    {{ form.charge_code_postal(class="input-field", placeholder="Code postal", size=16) }}
-</p>
-<p>
-    {{ form.charge_agence.label }}<br>
-    {{ form.charge_agence(class="form-control") }}
-</p>
-<p>{{ form.submit(class="btn") }}</p>
+<div>
+    {{ form.charge_nom.label }} {{ form.charge_nom() }}
+</div>
+<div>
+    {{ form.charge_prenom.label }} {{ form.charge_prenom() }}
+</div>
+<div>
+    {{ form.charge_matricule.label }} {{ form.charge_matricule() }}
+</div>
+<div>
+    {{ form.charge_telephone.label }} {{ form.charge_telephone() }}
+</div>
+<div>
+    {{ form.charge_immatriculation.label }} {{ form.charge_immatriculation() }}
+</div>
+<div>
+    {{ form.charge_email.label }} {{ form.charge_email() }}
+</div>
+<div>
+    {{ form.charge_adresse.label }} {{ form.charge_adresse() }}
+</div>
+<div>
+    {{ form.charge_ville.label }} {{ form.charge_ville() }}
+</div>
+<div>
+    {{ form.charge_code_postal.label }} {{ form.charge_code_postal() }}
+</div>
+<div>
+    {{ form.charge_agence.label }} {{ form.charge_agence() }}
+</div>
+

@@ -240,24 +240,6 @@ class Requete_BDD:
         self.mycursor.execute(new, val)
         self.mydb.commit()
 
-    def insert_chantier(self):
-        self.connexion()
-        form = ConfigFormnewChantier(chantier_entreprise_client='', chantier_code_affaire='', chantier_id_usine='', chantier_contact='')
-        entreprise_client = form.chantier_entreprise_client.data
-        code_affaire = form.chantier_code_affaire.data
-        usine= form.chantier_id_usine.data
-        # Extraction de la ville uniquement
-        ville = usine.split()[-1]
-
-        #Récupération de l'identation (num) de l'usine sélectionnée
-        self.mycursor.execute("USE ODM")
-        self.mycursor.execute("SELECT id_usine FROM usines WHERE ville=%s", (ville,))
-        id_usine = self.mycursor.fetchone()
-        id_usine = id_usine[0]
-        new = "INSERT INTO chantiers (entreprise_client, code_affaire, id_usine) VALUES (%s, %s, %s)"
-        val = (entreprise_client, code_affaire, id_usine)
-        self.mycursor.execute(new, val)
-        self.mydb.commit()
 
     def insert_affecter(self):
         self.connexion()
@@ -417,6 +399,15 @@ class Requete_BDD:
         self.mycursor.execute(query, (id,))
         result = self.mycursor.fetchone()
         return result
+    
+    def get_ville_agence_by_id(self, id):
+        self.connexion()
+        self.mycursor.execute("USE ODM")
+        query = "SELECT ville FROM agences WHERE id_agence = %s"
+        self.mycursor.execute(query, (id,))
+        result = self.mycursor.fetchone()
+        result = result[0]
+        return result
 
 
     def get_usine_by_id(self, id):
@@ -427,58 +418,160 @@ class Requete_BDD:
         result = self.mycursor.fetchone()
         return result
 
-    def update_personne(self, id, form):
+    def update_technicien(self, id, form):
         self.connexion()
+
+        #Récupération de l'identation (num) de l'agence spie sélectionnée
+        agence= form.tech_agence.data
         self.mycursor.execute("USE ODM")
+        self.mycursor.execute("SELECT id_agence FROM agences WHERE ville=%s", (agence,))
+        id_agence = self.mycursor.fetchone()
+        id_agence = id_agence[0]
+
         query = """
-            UPDATE personnes 
-            SET 
-                nom = %s, prenom = %s, matricule = %s, 
-                telephone = %s, immatriculation = %s, adresse = %s, 
-                code_postal = %s, ville = %s, charge_affaires = %s, 
-                email = %s, id_agence = %s 
+            UPDATE personnes
+            SET nom = %s, prenom = %s, matricule = %s, telephone = %s, 
+                immatriculation = %s, adresse = %s, code_postal = %s, ville = %s, 
+                charge_affaires = %s, email = %s, id_agence = %s
             WHERE id_personne = %s
         """
-        val = (
-            form.tech_nom.data, form.tech_prenom.data, 
-            form.tech_matricule.data, form.tech_telephone.data, 
-            form.tech_immatriculation.data, form.tech_adresse.data, 
-            form.tech_code_postal.data, form.tech_ville.data, 
-            form.tech_charge_affaires.data,  # Doit être un ID entier
-            form.tech_email.data, 
-            form.tech_agence.data,  # Doit être un ID entier
+
+        values = (
+            form.tech_nom.data,
+            form.tech_prenom.data,
+            form.tech_matricule.data,
+            form.tech_telephone.data,
+            form.tech_immatriculation.data,
+            form.tech_adresse.data,
+            form.tech_code_postal.data,
+            form.tech_ville.data,
+            form.tech_charge_affaires.data,
+            form.tech_email.data,
+            id_agence,
             id
         )
         try:
-            self.mycursor.execute(query, val)
+            self.mycursor.execute(query, values)
             self.mydb.commit()
-            print("✅ Mise à jour réussie.")
+            print("Mise à jour réussie pour la personne", id)
         except Exception as e:
-            print(f"❌ Erreur SQL : {e}")
+            print("Erreur lors de la mise à jour :", e)
+            self.mydb.rollback()
+
+    def update_charge(self, id, form):
+        self.connexion()
+
+        #Récupération de l'identation (num) de l'agence spie sélectionnée
+        agence= form.charge_agence.data
+        self.mycursor.execute("USE ODM")
+        self.mycursor.execute("SELECT id_agence FROM agences WHERE ville=%s", (agence,))
+        id_agence = self.mycursor.fetchone()
+        id_agence = id_agence[0]
+
+        query = """
+            UPDATE personnes
+            SET nom = %s, prenom = %s, matricule = %s, telephone = %s, 
+                immatriculation = %s, adresse = %s, code_postal = %s, ville = %s, 
+                email = %s, id_agence = %s
+            WHERE id_personne = %s
+        """
+
+        values = (
+            form.charge_nom.data,
+            form.charge_prenom.data,
+            form.charge_matricule.data,
+            form.charge_telephone.data,
+            form.charge_immatriculation.data,
+            form.charge_adresse.data,
+            form.charge_code_postal.data,
+            form.charge_ville.data,
+            form.charge_email.data,
+            id_agence,
+            id
+        )
+        try:
+            self.mycursor.execute(query, values)
+            self.mydb.commit()
+            print("Mise à jour réussie pour la personne", id)
+        except Exception as e:
+            print("Erreur lors de la mise à jour :", e)
+            self.mydb.rollback()
+        
+    def update_client(self, id, form):
+        self.connexion()
+        self.mycursor.execute("USE ODM")
+        
+        query = """
+            UPDATE personnes
+            SET nom = %s, prenom = %s, telephone = %s, email = %s
+            WHERE id_personne = %s
+        """
+
+        values = (
+            form.client_nom.data,
+            form.client_prenom.data,
+            form.client_telephone.data,
+            form.client_email.data,
+            id
+        )
+        try:
+            self.mycursor.execute(query, values)
+            self.mydb.commit()
+            print("Mise à jour réussie pour la personne", id)
+        except Exception as e:
+            print("Erreur lors de la mise à jour :", e)
             self.mydb.rollback()
 
     def update_chantier(self, id, form):
         self.connexion()
+    
+        usine= form.chantier_id_usine.data
+        # Extraction de la ville uniquement
+        ville = usine.split()[-1]
+
+        #Récupération de l'identation (num) de l'usine sélectionnée
         self.mycursor.execute("USE ODM")
+        self.mycursor.execute("SELECT id_usine FROM usines WHERE ville=%s", (ville,))
+        id_usine = self.mycursor.fetchone()
+        id_usine = id_usine[0]
+
         query = """
             UPDATE chantiers 
-            SET entreprise_client = %s, code_affaire = %s, id_usine = %s, contact_client = %s 
+            SET entreprise_client = %s, code_affaire = %s, id_usine = %s
             WHERE id_chantier = %s
         """
-        val = (
-            form.chantier_entreprise_client.data, form.chantier_code_affaire.data, form.chantier_id_usine.data,
-            form.chantier_contact.data, id
-        )
+        val = (form.chantier_entreprise_client.data, form.chantier_code_affaire.data, id_usine, id)
         self.mycursor.execute(query, val)
         self.mydb.commit()
 
+
+    def update_affecter(self, id, form):
+        self.connexion()
+      
+
+        nom_complet= form.chantier_contact.data
+        # Extraction du nom
+        nom = nom_complet.split()[0]
+        print(nom)
+        print(nom)
+        #Récupération de l'identation (num) de l'usine sélectionnée
+        self.mycursor.execute("USE ODM")
+        self.mycursor.execute("SELECT id_personne FROM personnes WHERE nom=%s", (nom,))
+        id_personne = self.mycursor.fetchone()
+        id_personne = id_personne[0]
+
+
+        query = """UPDATE affecter SET id_personne = %s WHERE id_chantier = %s"""
+        val = (id_personne, id)
+        self.mycursor.execute(query, val)
+        self.mydb.commit()
 
     def update_usine(self, id, form):
         self.connexion()
         self.mycursor.execute("USE ODM")
         query = """
             UPDATE usines 
-            SET entreprise = %s, adresse = %s, code_postal = %s, ville = %s 
+            SET entreprise_usine = %s, adresse = %s, code_postal = %s, ville = %s 
             WHERE id_usine = %s
         """
         val = (
@@ -866,33 +959,48 @@ class Requete_BDD:
         
         return agence, column_names
     
-
+    
     def afficher_chantier(self):
         self.connexion()
         self.mycursor.execute("USE ODM")
-        self.mycursor.execute("SELECT * FROM chantiers")
-        
-        # Récupérer toutes les lignes
-        chantier = self.mycursor.fetchall()
 
-        # Récupérer les noms de colonnes
+        query = """
+            SELECT c.id_chantier, c.entreprise_client, c.code_affaire, 
+                u.entreprise_usine AS usine, 
+                CONCAT(p.prenom, ' ', p.nom) AS contact
+            FROM chantiers c
+            LEFT JOIN usines u ON c.id_usine = u.id_usine
+            LEFT JOIN affecter a ON c.id_chantier = a.id_chantier
+            LEFT JOIN personnes p ON a.id_personne = p.id_personne
+        """
+        self.mycursor.execute(query)
+
+        chantier = self.mycursor.fetchall()
         column_names = [i[0] for i in self.mycursor.description]
-        
+
         return chantier, column_names
+
+
 
     def afficher_personne(self):
         self.connexion()
         self.mycursor.execute("USE ODM")
-        self.mycursor.execute("SELECT * FROM personnes")
-        
-        # Récupérer toutes les lignes
-        personne = self.mycursor.fetchall()
 
-        # Récupérer les noms de colonnes
+        query = """
+            SELECT p.id_personne, p.nom, p.prenom, p.matricule, p.telephone, 
+                p.immatriculation, p.adresse, p.code_postal, p.ville, 
+                p.charge_affaires, p.email, a.ville AS agence, r.nom_role AS role
+            FROM personnes p
+            LEFT JOIN agences a ON p.id_agence = a.id_agence
+            LEFT JOIN roles r ON p.id_role = r.id_role
+        """
+        self.mycursor.execute(query)
+
+        personne = self.mycursor.fetchall()
         column_names = [i[0] for i in self.mycursor.description]
-        
+
         return personne, column_names
-    
+
     def afficher_user(self):
         self.connexion()
         self.mycursor.execute("USE ODM")

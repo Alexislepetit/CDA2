@@ -29,18 +29,54 @@
                 <table>
                     <thead>
                         <tr>
-                            {% for col in column_names %}
-                                <th>{{ col }}</th>
-                            {% endfor %}
-                            <th></th>
+                            {% if selection == 'Personnes' %}
+                                <th>ID Personne</th>
+                                <th>Nom</th>
+                                <th>Prénom</th>
+                                <th>Matricule</th>
+                                <th>Téléphone</th>
+                                <th>Immatriculation</th>
+                                <th>Adresse</th>
+                                <th>Code postal</th>
+                                <th>Ville</th>
+                                <th>Chargé d'affaire</th>
+                                <th>Email</th>
+                                <th>Agence Spie</th>
+                                <th>Rôle</th>
+                                <th>Action</th>
+                            {% elif selection == 'Chantiers' %}
+                                <th>ID Chantier</th>
+                                <th>Client</th>
+                                <th>Code affaire</th>
+                                <th>Usine</th>
+                                <th>Contact</th>
+                                <th>Action</th>
+                            {% elif selection == 'Usines' %}
+                                <th>ID Usine</th>
+                                <th>Entreprise</th>
+                                <th>Adresse</th>
+                                <th>Code postal</th>
+                                <th>Ville</th>
+                                <th>Action</th>
+                            {% elif selection == 'Agences' %}
+                                <th>ID Agence</th>
+                                <th>Ville</th>
+                                <th>Action</th>
+                            {% endif %}
                         </tr>
                     </thead>
                     <tbody>
                         {% for row in data %}
                             <tr>
                                 {% for value in row %}
-                                    <td>{{ value }}</td>
-                                {% endfor %}
+                                <td>
+                                    {% if value is none %}
+                                        &nbsp;  <!-- Affiche une cellule vide -->
+                                    {% else %}
+                                        {{ value }}
+                                    {% endif %}
+                                </td>
+                                    {% endfor %}
                                 <td>
                                     <form action="{{ url_for('delete_item', type=selection, id=row[0]) }}" method="POST">
                                         <button type="submit" class="delete-btn">Supprimer</button>

@@ -1,18 +1,12 @@
-<!-- templates/form_client_edit.html -->
-<p>
-    {{ form.client_nom.label }}<br>
-    {{ form.client_nom(class="input-field", placeholder="Nom", size=16) }}
-</p>
-<p>
-    {{ form.client_prenom.label }}<br>
-    {{ form.client_prenom(class="input-field", placeholder="Prénom", size=16) }}
-</p>
-<p>
-    {{ form.client_telephone.label }}<br>
-    {{ form.client_telephone(class="input-field", placeholder="Téléphone", size=16) }}
-</p>
-<p>
-    {{ form.client_email.label }}<br>
-    {{ form.client_email(class="input-field", placeholder="Email", size=16) }}
-</p>
-<p>{{ form.submit(class="btn") }}</p>
+<div>
+    {{ form.client_nom.label }} {{ form.client_nom() }}
+</div>
+<div>
+    {{ form.client_prenom.label }} {{ form.client_prenom() }}
+</div>
+<div>
+    {{ form.client_telephone.label }} {{ form.client_telephone() }}
+</div>
+<div>
+    {{ form.client_email.label }} {{ form.client_email() }}
+</div>
