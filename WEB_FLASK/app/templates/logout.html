@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Déconnexion...</title>
+    <script>
+        // Désactive le retour arrière
+        history.pushState(null, null, location.href);
+        window.onpopstate = function () {
+            history.go(1);
+        };
+ 
+        // Recharge immédiatement la page de connexion
+        setTimeout(function() {
+            window.location.href = "{{ url_for('login') }}";
+        }, 100);
+    </script>
+</head>
+<body>
+    <p>Déconnexion en cours... Veuillez patienter.</p>
+</body>
+</html>

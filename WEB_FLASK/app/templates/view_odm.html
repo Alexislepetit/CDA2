@@ -1,13 +1,43 @@
 {% extends "base.html" %}
 
-{%block sidebar %}
-<li><a href="/view_bdd" >Base de données</a></li>
-<li><a href="/create_odm">Création ODM</a></li>
-<li><a href="/view_odm"class="page-active">Consulter ODM</a></li>
-<li><a href="/gestion_user">Gestion utilisateurs</a></li>
+{% block sidebar %}
+    <li><a href="/view_bdd">Base de données</a></li>
+    <li><a href="/create_odm">Création ODM</a></li>
+    <li><a href="/view_odm" class="page-active">Consulter ODM</a></li>
 {% endblock %}
 
-{%block content %}
-
-
+{% block content %}
+    <h1>Consulter ODM</h1>
+    <div class="sorting-options">
+        <a href="/view_odm?sort_by=date">Trier par Date</a> |
+        <a href="/view_odm?sort_by=name">Trier par Nom</a> |
+        <a href="/view_odm?sort_by=usine">Trier par Usine</a>
+    </div>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Nom du Fichier</th>
+                    <th>Date de Modification</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for file in excel_files %}
+                    <tr>
+                        <td>{{ file['filename'] }}</td>
+                        <td>{{ file['modified'] }}</td>
+                        <td><a href="{{ file['path'] }}" class="download-btn">Télécharger</a></td>
+                    </tr>
+                {% endfor %}
+                {% for file in pdf_files %}
+                    <tr>
+                        <td>{{ file['filename'] }}</td>
+                        <td>{{ file['modified'] }}</td>
+                        <td><a href="{{ file['path'] }}" class="download-btn">Télécharger</a></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 {% endblock %}

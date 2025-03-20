@@ -54,6 +54,7 @@ class class_gps:
         except requests.exceptions.RequestException as e:
             print(f"Erreur lors de la requête API : {e}")  # Affiche l'erreur si la requête échoue
             return None, None  # Retourne None en cas d'erreur lors de la requête API
+            
         
     def haversine(self, lat1, lon1, lat2, lon2):
         """

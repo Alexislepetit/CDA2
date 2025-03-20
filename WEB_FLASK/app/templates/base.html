@@ -7,33 +7,59 @@
     <title>Consultation des bases de données</title>
 </head>
 
-<div class="sidebar">
-    <img src="{{ url_for('static', filename='image/Logospie.png') }}" alt="Logo SPIE" class="logo">
-    <div class="welcome">
-        <h2>Utilisateur :</h2>
-        <p> Malo</p>
-    </div>
+<body>
+    <div class="sidebar">
+        <img src="{{ url_for('static', filename='image/Logospie.png') }}" alt="Logo SPIE" class="logo">
+        <div class="welcome">
+            <h2>Utilisateur :</h2>
+            <p>{{ current_user.username }}</p>
+        </div>
         <nav>
             <ul>
                 {% block sidebar %}{% endblock %}
             </ul>
-            
         </nav>
         <div class="logout">
-            <a href="/login" class="logout-btn">
-                Se déconnecter
-            </a>
-        </div>,
+            <a href="/logout" class="logout-btn">Se déconnecter</a>
+        </div>
     </div>
+
+     <!-- Affichage des messages flash sans Bootstrap -->
+     <div class="flash-messages">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+            {% for category, message in messages %}
+                <div class="flash-message flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+            </div>
+        {% endif %}
+        {% endwith %}
+    </div>
+    
     <div class="main-content">
         <div class="banner">
             <img src="{{ url_for('static', filename='image/test_banniere2.jpg') }}" alt="Bannière" class="banner-image">
         </div>
-        <body>
+
+       
+
         <div class="content">
             {% block content %}{% endblock %}
             {% block scripts %}{% endblock %}
         </div>
     </div>
-    </body>
+
+    <!-- Script pour auto-fermer les messages flash après 5 secondes -->
+    <script>
+        setTimeout(function() {
+            let messages = document.querySelectorAll(".flash-message");
+            messages.forEach(msg => {
+                msg.style.transition = "opacity 0.5s";
+                msg.style.opacity = "0";
+                setTimeout(() => msg.remove(), 500);
+            });
+        }, 5000);
+    </script>
+</body>
 </html>

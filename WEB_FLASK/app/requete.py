@@ -368,7 +368,28 @@ class Requete_BDD:
             print("Utilisateur supprimé avec succès.")
         else:
             print("Aucun utilisateur trouvé avec ces nom et prénom.")
+    
 
+    def get_user_by_username(self, username):
+        self.connexion()
+        self.mycursor.execute("USE ODM")
+        # Méthode pour récupérer un utilisateur par son nom d'utilisateur
+        query = "SELECT * FROM utilisateurs WHERE email = %s"
+        self.mycursor.execute(query, (username,))
+        result = self.mycursor.fetchone()
+        return result
+    
+    def get_user_by_id(self, user_id):
+        self.connexion()
+        self.mycursor.execute("USE ODM")
+        # Méthode pour récupérer un utilisateur par son ID
+        query = "SELECT * FROM utilisateurs WHERE id_utilisateur = %s"
+        self.mycursor.execute(query, (user_id,))
+        result = self.mycursor.fetchone()
+        return result
+    
+
+    
     def get_personne_by_id(self, id):
         """Récupère une personne par son ID avec toutes les colonnes."""
         self.connexion()

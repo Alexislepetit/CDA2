@@ -12,7 +12,7 @@ class ConfigFormnewTech(FlaskForm):
     tech_nom = StringField('Nom', validators=[DataRequired()])
     tech_prenom = StringField('Prénom', validators=[DataRequired()])
     tech_matricule = StringField('Matricule', validators=[DataRequired()])
-    tech_telephone = StringField('telephone', validators=[DataRequired()])
+    tech_telephone = StringField('Téléphone', validators=[DataRequired()])
     tech_immatriculation = StringField('Immatriculation du véhicule', validators=[DataRequired()])
     tech_email = StringField('E-mail', validators=[DataRequired()])
     tech_ville = StringField('Ville', validators=[DataRequired()])
@@ -25,14 +25,14 @@ class ConfigFormnewTech(FlaskForm):
 class ConfigFormnewClient(FlaskForm):
     client_nom = StringField('Nom', validators=[DataRequired()])
     client_prenom = StringField('Prénom', validators=[DataRequired()])
-    client_telephone = StringField('telephone', validators=[DataRequired()])
+    client_telephone = StringField('Téléphone', validators=[DataRequired()])
     client_email = StringField('E-mail', validators=[DataRequired()])
     submit = SubmitField('Valider')
     
 class ConfigFormnewContactSpie(FlaskForm):
     contactspie_nom = StringField('Nom', validators=[DataRequired()])
     contactspie_prenom = StringField('Prénom', validators=[DataRequired()])
-    contactspie_telephone = StringField('telephone', validators=[DataRequired()])
+    contactspie_telephone = StringField('Téléphone', validators=[DataRequired()])
     contactspie_email = StringField('E-mail', validators=[DataRequired()])
     submit = SubmitField('Valider')
 
@@ -40,7 +40,7 @@ class ConfigFormnewCharge(FlaskForm):
     charge_nom = StringField('Nom', validators=[DataRequired()])
     charge_prenom = StringField('Prénom', validators=[DataRequired()])
     charge_matricule = StringField('Matricule', validators=[DataRequired()])
-    charge_telephone = StringField('telephone', validators=[DataRequired()])
+    charge_telephone = StringField('Téléphone', validators=[DataRequired()])
     charge_immatriculation = StringField('Immatriculation du véhicule', validators=[DataRequired()])
     charge_email = StringField('E-mail', validators=[DataRequired()])
     charge_ville = StringField('Ville', validators=[DataRequired()])

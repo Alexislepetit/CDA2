@@ -9,21 +9,35 @@ import subprocess
 from openpyxl.styles import NamedStyle
 from datetime import datetime
 import requests
-
+import shutil
 
 
 class Excel:
-    
     def __init__(self):
         pass
-    
-    def Comp_Excel(self, nom_data, prenom_data, usine_data, client_data, contact_data,telephone_contact_data, email_contact, debut_data, fin_data, matricule_data, charge_data, adresse_data, mail_charge_data, telephone_charge_data, affaire_data, adresse_usine_data, mission_data, immatriculation_data, zone_data):
+        
+    def Comp_Excel(self, nom_data, prenom_data, usine_data, client_data, contact_data, 
+                  telephone_contact_data, email_contact, debut_data, fin_data, 
+                  matricule_data, charge_data, adresse_data, mail_charge_data, 
+                  telephone_charge_data, affaire_data, adresse_usine_data, 
+                  mission_data, immatriculation_data, zone_data, excel_path=None):
         """Rempli le excel et le convertis en PDF"""
+        # Utiliser le chemin Excel fourni ou utiliser celui par défaut
+        self.excel_path = excel_path or os.path.abspath("app/formulaire.xlsx")
+        
+        # Vérifier que le fichier Excel existe
+        if not os.path.isfile(self.excel_path):
+            raise FileNotFoundError(f"Le fichier Excel {self.excel_path} n'existe pas")
+        
+        # Ouvrir le workbook spécifié
+        self.workbook = openpyxl.load_workbook(self.excel_path)
+        
+        # Remplir les données
         self.nom(nom_data, prenom_data)
         #self.prenom(prenom_data)
         self.usine(usine_data, adresse_usine_data)
         self.affaire(affaire_data)
-        self.client(client_data, contact_data,telephone_contact_data,email_contact)
+        self.client(client_data, contact_data, telephone_contact_data, email_contact)
         self.date_debut(debut_data)
         self.date_fin(fin_data)
         self.matricule(matricule_data)
@@ -35,24 +49,33 @@ class Excel:
         self.zone(zone_data)
         self.date()
         
-
-        self.PDF(os.path.abspath("app/formulaire.xlsx"), "/home/user/Documents/CDA/CDA/WEB_FLASK/")
-
-    def PDF(self, excel_path, pdf_output_dir):
+        # Sauvegarder le workbook
+        self.workbook.save(self.excel_path)
+        
+    def PDF(self, excel_path, odm_pdf):
+        # Vérifier que le fichier Excel existe
+        if not os.path.isfile(excel_path):
+            print(f"Erreur: Le fichier Excel {excel_path} n'existe pas")
+            return None
+            
         # Créer le dossier de sortie s'il n'existe pas
-        os.makedirs(pdf_output_dir, exist_ok=True)
+        os.makedirs(odm_pdf, exist_ok=True)
+        
+        # Afficher les chemins pour le débogage
+        print(f"Chemin Excel: {excel_path}")
+        print(f"Dossier PDF: {odm_pdf}")
         
         # Conversion avec LibreOffice
         command = [
             "libreoffice", "--headless", "--convert-to", "pdf:writer_pdf_Export",
-            excel_path, "--outdir", pdf_output_dir
+            excel_path, "--outdir", odm_pdf
         ]
         
         try:
             result = subprocess.run(
-                command, 
-                check=True, 
-                stdout=subprocess.PIPE, 
+                command,
+                check=True,
+                stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True
             )
@@ -60,8 +83,13 @@ class Excel:
             
             # Récupération du chemin du PDF généré
             pdf_filename = os.path.splitext(os.path.basename(excel_path))[0] + ".pdf"
-            pdf_path = os.path.join(pdf_output_dir, pdf_filename)
+            pdf_path = os.path.join(odm_pdf, pdf_filename)
             
+            # Vérifier que le PDF a bien été créé
+            if not os.path.isfile(pdf_path):
+                print(f"Erreur: Le PDF {pdf_path} n'a pas été généré")
+                return None
+                
             return pdf_path
             
         except subprocess.CalledProcessError as e:

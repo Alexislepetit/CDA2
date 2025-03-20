@@ -147,3 +147,31 @@ nav ul li a.page-active:hover {
   margin-right: 8px;
 }
 
+/* Conteneur des messages flash */
+.flash-messages {
+  position: fixed;
+  top: 90%;  
+  left: 50%;  /* Centré horizontalement */
+  transform: translate(-50%, -50%);  /* Centrage parfait */
+  z-index: 1000;
+  width: 300px;  /* Largeur fixe */
+}
+
+/* Style général des messages */
+.flash-message {
+  padding: 12px 20px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  font-weight: bold;
+  font-size: 16px;
+  color: white;
+  text-align: center;
+  min-width: 250px;
+  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Couleurs spécifiques */
+.flash-success { background-color: #4CAF50; }  /* Vert */
+.flash-error { background-color: #f44336; }    /* Rouge */
+.flash-warning { background-color: #ff9800; }  /* Orange */
+.flash-info { background-color: #2196F3; }     /* Bleu */

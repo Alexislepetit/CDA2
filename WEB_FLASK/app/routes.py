@@ -1,6 +1,6 @@
 from flask import render_template, request, redirect, url_for, session, send_file, flash, jsonify, request
 import requests
-from flask_login import LoginManager
+from flask_login import login_user, login_required, logout_user, current_user
 from app import app
 from app.forms import *
 from app.requete import Requete_BDD
@@ -8,6 +8,9 @@ from app.excel import Excel
 from datetime import datetime
 import os
 from app.gps import class_gps
+from app.login import utilisateur
+import shutil
+from app.historique_odm import historique_ODM
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -16,6 +19,13 @@ def redirect_login():
     return redirect('/login')
 
 
+@app.route('/logout', methods=['GET', 'POST'])
+def logout():
+    print("Déconnexion de l'utilisateur")
+    logout_user()  # Déconnecter l'utilisateur
+    session.clear()
+    flash('Vous êtes maintenant déconnecté.', 'success')
+    return render_template('logout.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -29,51 +39,172 @@ def login():
         user = form.user_username.data
         BDD = Requete_BDD()
         redirection = BDD.register()
-        if redirection == 1 :
-            session['user'] = user
-            return redirect('/view_bdd')
-        if redirection == 2 :
+
+        if redirection == 1:
+            # Récupérer l'utilisateur à partir de la base de données
+            user_data = BDD.get_user_by_username(user)
+            if user_data:
+                # Créer un objet User et connecter l'utilisateur
+                user_obj = utilisateur(id=user_data[0], username=user_data[1], role=user_data[3])
+                login_user(user_obj)
+                flash('Connexion réussie !', 'success')
+                print(session)
+                return redirect('/view_bdd')
+            else:
+                flash("Utilisateur non trouvé", "error")
+                return redirect(url_for('login'))
+        
+        elif redirection == 2 :
             flash("Identifiant erroné", "error")  # Affiche un message d'erreur
             return redirect(url_for('login'))
+    
     return render_template('login.html', form=form)
 
 
 
 
 @app.route('/view_bdd', methods=['GET', 'POST'])
+@login_required  # Ajout de la protection par login
 def view_bdd():
     # Initialisation par défaut
-    selection = None
     data = []
     column_names = []
     requete = Requete_BDD()
     
+    # Récupération de la sélection (POST ou GET)
     if request.method == 'POST':
         selection = request.form.get('choix')
-    elif request.method == 'GET':
-        selection = request.args.get('choix')  # Récupérer le paramètre choix de l'URL
+        filtre_colonne = request.form.get('filtre_colonne', '')
+        filtre_valeur = request.form.get('filtre_valeur', '').strip()
+        tri_colonne = request.form.get('tri_colonne', '')
+        tri_ordre = request.form.get('tri_ordre', 'asc')
+    else:
+        selection = request.args.get('choix', 'Personnes')
+        filtre_colonne = request.args.get('filtre_colonne', '')
+        filtre_valeur = request.args.get('filtre_valeur', '').strip()
+        tri_colonne = request.args.get('tri_colonne', '')
+        tri_ordre = request.args.get('tri_ordre', 'asc')
+        
+    # Récupérer les données selon la sélection avec un dictionnaire
+    table_functions = {
+        'Personnes': requete.afficher_personne,
+        'Chantiers': requete.afficher_chantier,
+        'Usines': requete.afficher_usine,
+        'Agences': requete.afficher_agence
+    }
     
-    # Si aucune sélection n'est définie, utiliser 'Personnes' par défaut
-    if selection is None or selection == '':
-        selection = 'Personnes'
-        
-    # Récupérer les données selon la sélection
-    if selection == 'Personnes':
+    # Utiliser la fonction appropriée ou une valeur par défaut
+    if selection in table_functions:
+        data, column_names = table_functions[selection]()
+    else:
+        # Valeur par défaut si la sélection n'est pas valide
         data, column_names = requete.afficher_personne()
-    elif selection == 'Chantiers':
-        data, column_names = requete.afficher_chantier()
-    elif selection == 'Usines':
-        data, column_names = requete.afficher_usine()
-    elif selection == 'Agences':
-        data, column_names = requete.afficher_agence()
+        selection = 'Personnes'
+    
+    # Définition des mappages de noms personnalisés par type de table
+    column_mappings = {
+        'Personnes': {
+            'id_personne': 'ID',
+            'nom': 'Nom',
+            'prenom': 'Prénom',
+            'email': 'Email',
+            'telephone': "Téléphone",
+            'immatriculation' : 'Immatriculation',
+            'adresse': 'Adresse',
+            'code_postal': 'Code postal',
+            'ville': 'Ville',
+            'pays': 'Pays',
+            'fonction': 'Fonction',
+            'charge_affaires': "Chargé d'affaires",
+            'agence': 'Agence',
+            'role' : 'Rôle'
+        },
+        'Chantiers': {
+            'id_chantier': 'ID',
+            'entreprise_client': 'Entreprise Client',
+            'code_affaire': 'Code Affaire',
+            'usine': 'Usine',
+            'contact': 'Contact',
+            'adresse': 'Adresse',
+        },
+        'Usines': {
+            'id_usine': 'ID',
+            'entreprise_usine': 'Entreprise Usine',
+        },
+        'Agences': {
+            'id_agence': 'ID',
+        }
+    }
+    
+    # Récupérer le mappage pour la sélection actuelle
+    current_mapping = column_mappings.get(selection, {})
+    
+    # Créer la liste des noms d'affichage
+    display_names = []
+    for col in column_names:
+        # Utiliser le nom personnalisé s'il existe, sinon utiliser le nom original
+        display_names.append(current_mapping.get(col, col))
+    
+    # Créer un mappage inverse pour les opérations de filtre et de tri
+    reverse_mapping = {original: displayed for original, displayed in zip(column_names, display_names)}
+    
+    # Trouver la colonne originale correspondant au filtre/tri si nécessaire
+    if filtre_colonne:
+        filtre_colonne_original = next((original for original, displayed in reverse_mapping.items() 
+                               if displayed == filtre_colonne), filtre_colonne)
+    else:
+        filtre_colonne_original = filtre_colonne
         
-    return render_template('view_bdd.html', data=data, column_names=column_names, selection=selection)
-
+    if tri_colonne:
+        tri_colonne_original = next((original for original, displayed in reverse_mapping.items() 
+                               if displayed == tri_colonne), tri_colonne)
+    else:
+        tri_colonne_original = tri_colonne
+    
+    # Appliquer le filtre si nécessaire
+    if filtre_colonne_original and filtre_valeur and filtre_colonne_original in column_names:
+        col_index = column_names.index(filtre_colonne_original)
+        data = [row for row in data if filtre_valeur.lower() in str(row[col_index]).lower()]
+    
+    # Appliquer le tri si nécessaire
+    if tri_colonne_original and tri_colonne_original in column_names:
+        col_index = column_names.index(tri_colonne_original)
+        # Gestion du tri en fonction du type de données
+        try:
+            # Essayer de convertir en nombre pour un tri numérique
+            data = sorted(data, key=lambda x: float(str(x[col_index]).replace(',', '.'))
+                         if x[col_index] is not None and str(x[col_index]).replace(',', '.').replace('.', '', 1).isdigit()
+                         else float('-inf'), reverse=(tri_ordre == 'desc'))
+        except (ValueError, TypeError):
+            # Tri par texte si la conversion numérique échoue
+            data = sorted(data, key=lambda x: str(x[col_index]).lower() if x[col_index] is not None else '',
+                         reverse=(tri_ordre == 'desc'))
+    
+    return render_template(
+        'view_bdd.html',
+        data=data,
+        column_names=display_names,
+        original_column_names=column_names,
+        selection=selection,
+        filtre_colonne=filtre_colonne,
+        filtre_valeur=filtre_valeur,
+        tri_colonne=tri_colonne,
+        tri_ordre=tri_ordre
+    )
 
 
 
 @app.route('/add_user', methods=['GET', 'POST'])
+@login_required  # Ajout de la protection par login
 def add_user():
+    if not current_user.is_authenticated:
+        flash("Vous devez être connecté pour accéder à cette page", "danger")
+        return redirect(url_for('login'))
+
+    if not current_user.admin():  # Utilisation correcte
+        flash("Accès refusé : vous n'êtes pas administrateur", "danger")
+        return redirect(url_for('view_bdd'))
+
     form = ConfigFormnewUser(user_utilisateur='', user_password='', user_password2='',admin='')
     if form.validate_on_submit():
         BDD = Requete_BDD()
@@ -88,12 +219,79 @@ def add_user():
      
     return render_template('add_user.html', form=form)
 
+from datetime import datetime
+
+# Définir un filtre pour formater les dates
+@app.template_filter('date')
+def format_date(value, format='%d-%m-%Y %H:%M'):
+    if isinstance(value, datetime.datetime):
+        return value.strftime(format)
+    return value    
+
+
+@app.route('/view_odm')
+@login_required
+def view_odm():
+    odm = historique_ODM()
+
+    # Récupérer le chemin absolu vers le répertoire "odm_excel" et "odm_pdf" dans le dossier "app"
+    base_dir = os.path.dirname(os.path.abspath(__file__))  # Récupère le répertoire actuel (app)
+    excel_directory = os.path.join(base_dir, "odm_excel")  # Chemin vers "odm_excel"
+    pdf_directory = os.path.join(base_dir, "odm_pdf")      # Chemin vers "odm_pdf"
+
+    # Obtenir les fichiers dans les répertoires Excel et PDF
+    excel_files = odm.get_files_in_directory(excel_directory)
+    pdf_files = odm.get_files_in_directory(pdf_directory)
+    
+    # Formater les dates dans le format souhaité
+    for file in excel_files:
+        # Convertir la timestamp en datetime avant d'appliquer strftime
+        file['modified'] = datetime.fromtimestamp(file['modified']).strftime('%d-%m-%Y %H:%M')
+
+    for file in pdf_files:
+        # Convertir la timestamp en datetime avant d'appliquer strftime
+        file['modified'] = datetime.fromtimestamp(file['modified']).strftime('%d-%m-%Y %H:%M')
+
+    # Passer les fichiers formatés à la template
+    return render_template('view_odm.html', excel_files=excel_files, pdf_files=pdf_files)
+
+
+
+@app.route('/recuperer_pdf/<filename>')
+@login_required
+def recuperer_pdf(filename):
+    pdf_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'odm_pdf')
+    file_path = os.path.join(pdf_dir, filename)
+    
+    if os.path.isfile(file_path):
+        return send_file(file_path, as_attachment=True)
+    else:
+        return "Le fichier n'existe pas.", 404
+    
+@app.route('/recuperer_excel/<filename>')
+@login_required
+def recuperer_excel(filename):
+    excel_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'odm_excel')
+    file_path = os.path.join(excel_dir, filename)
+    
+    if os.path.isfile(file_path):
+        return send_file(file_path, as_attachment=True)
+    else:
+        return "Le fichier n'existe pas.", 404
+
+
 
 
 @app.route('/gestion_user', methods=['GET', 'POST'])
 def gestion_user():
+    if not current_user.is_authenticated:
+        flash("Vous devez être connecté pour accéder à cette page", "error")
+        return redirect(url_for('login'))
 
-    
+    if not current_user.admin():  # Utilisation correcte
+        flash("Accès refusé : vous n'êtes pas administrateur", "error")
+        return redirect(url_for('view_bdd'))
+
     requete = Requete_BDD()
     data, column_names = requete.afficher_user()
 
@@ -101,6 +299,7 @@ def gestion_user():
 
 
 @app.route('/add_Personnes', methods=['GET', 'POST'])
+@login_required  # Ajout de la protection par login
 def add_Personnes():
     bdd = Requete_BDD()
     
@@ -167,6 +366,7 @@ def add_Personnes():
 
 
 @app.route('/add_Chantiers', methods=['GET', 'POST'])
+@login_required  # Ajout de la protection par login
 def add_Chantiers():
     BDD = Requete_BDD()
     form = ConfigFormnewChantier()
@@ -181,6 +381,7 @@ def add_Chantiers():
 
 
 @app.route('/add_Usines', methods=['GET', 'POST'])
+@login_required  # Ajout de la protection par login
 def add_Usines():
     BDD = Requete_BDD()
     form = ConfigFormnewUsine()
@@ -191,6 +392,7 @@ def add_Usines():
     return render_template('add_Usines.html', form=form)
 
 @app.route('/add_Agences', methods=['GET', 'POST'])
+@login_required  # Ajout de la protection par login
 def add_Agences():
     BDD = Requete_BDD()
     form = ConfigFormnewAgence()
@@ -203,6 +405,7 @@ def add_Agences():
 
 
 @app.route('/delete_item/<type>/<int:id>', methods=['POST'])
+@login_required  # Ajout de la protection par login
 def delete_item(type, id):
     bdd = Requete_BDD()
     if type == "Personnes":
@@ -222,6 +425,7 @@ def delete_item(type, id):
     return redirect(url_for('view_bdd', choix=type))
 
 @app.route('/edit/<string:type>/<int:id>', methods=['GET', 'POST'])
+@login_required  # Ajout de la protection par login
 def edit_item(type, id):
     print(f"Tentative de modification : Type={type}, ID={id}")
     bdd = Requete_BDD()
@@ -380,6 +584,7 @@ def edit_item(type, id):
 
 
 @app.route('/delete_utilisateur/<string:id_utilisateur>', methods=['GET', 'POST'])
+@login_required  # Ajout de la protection par login
 def delete_utilisateur(id_utilisateur):
     BDD = Requete_BDD()
     BDD.delete_utilisateur(id_utilisateur)
@@ -390,6 +595,7 @@ def delete_utilisateur(id_utilisateur):
 
 
 @app.route('/get_chantiers/<usine>', methods=['GET'])
+@login_required  # Ajout de la protection par login
 def get_chantiers(usine):
     BDD = Requete_BDD()
     try:
@@ -403,6 +609,7 @@ def get_chantiers(usine):
 
 
 @app.route('/create_odm', methods=['GET', 'POST'])
+@login_required  # Ajout de la protection par login
 def create_odm():
     user = session.get('user')
     
@@ -510,134 +717,80 @@ def create_odm():
                          user=user)
 
 
-@app.route('/view_odm', methods=['GET', 'POST'])
-def view_odm():
- 
-     
-    return render_template('view_odm.html')
-
-@app.route('/creation_odm2', methods=['GET', 'POST'] ) # decorators
-def ODM2():
-    user = session.get('user')
-    BDD = Requete_BDD()
-    form = Recherche_BDD_ODM()
-
-    prenom = session.get('prenom')
-    usine = session.get('usine')
-    nom = session.get('nom')
-    usine_entreprise = session.get('usine_entreprise')
-    usine_ville = session.get('usine_ville')
-    id_usine = session.get('id_usine')
-   
-    adresse_usine = session.get('adresse usine')
-
-    
-    #gestion liste clients
-    liste_chantiers=BDD.liste_chantier(usine_entreprise,usine_ville)
-    form.chantier_recherche.choices = [(liste_chantier, liste_chantier) for liste_chantier in liste_chantiers]
-
-    if form.validate_on_submit():
-
-        date_debut = form.date_debut.data
-        date_fin = form.date_fin.data
-        mission = form.mission.data
-
-        # Formatage des dates
-        date_debut_formatee = date_debut.strftime("%d/%m/%Y")
-        date_fin_formatee = date_fin.strftime("%d/%m/%Y")
-        client = form.chantier_recherche.data  
-     
-        
-        affaire=BDD.code_affaire(client,id_usine)
-        id_chantier=BDD.id_chantier(affaire)
-        adresse_usine=BDD.adresse_usine(client)
-        id_personne_client=BDD.id_personne_client(id_chantier)
-        contact=BDD.liste_contact(id_personne_client)
-
-
-        session['id_chantier'] = id_chantier
-        session['client'] = client
-        session['affaire'] = affaire
-        session['adresse_usine'] = adresse_usine
-        session['contact'] = contact
-        session['date_debut'] = date_debut_formatee
-        session['date_fin'] = date_fin_formatee
-        session['mission'] = mission
-    
-
-        return render_template('/creation_odm3.html', form=form)
-    
-    
-    return render_template('creation_odm2.html', form=form, user=user,liste_chantier=liste_chantiers, nom=nom, prenom=prenom, usine=usine )
-
-
-@app.route('/creation_odm3', methods=['GET', 'POST'] ) # decorators
-def ODM3():
-    user = session.get('user')
-
-        
-    return render_template('creation_odm3.html')
-
-
 @app.route('/download_pdf')
+@login_required # Ajout de la protection par login
 def download_pdf():
     # Récupération des données de session
     required_keys = [
-        'nom', 'prenom', 'usine', 'client', 'contact', 'telephone_contact', 
-        'email_contact', 'date_debut', 'date_fin', 'matricule', 'charge', 
-        'adresse', 'mail_charge', 'telephone_charge', 'affaire', 
-        'adresse_usine', 'mission', 'immatriculation'
+        'nom', 'prenom', 'usine', 'client', 'contact', 'telephone_contact',
+        'email_contact', 'date_debut', 'date_fin', 'matricule', 'charge',
+        'adresse', 'mail_charge', 'telephone_charge', 'affaire',
+        'adresse_usine', 'mission', 'immatriculation', 'zone'
     ]
-
     # Vérification que toutes les clés de session sont présentes
     for key in required_keys:
         if key not in session:
             return f"Donnée manquante dans la session : {key}", 400
-
+            
     # Récupération des valeurs de session
     nom = session.get('nom')
     prenom = session.get('prenom')
     date_debut = session.get('date_debut')
     date_fin = session.get('date_fin')
-
+    
+    # Formater les dates pour le nom de fichier (remplacer les / par des -)
+    date_debut_formatted = date_debut.replace('/', '-')
+    date_fin_formatted = date_fin.replace('/', '-')
+    
     # Chemins dynamiques
     base_dir = os.path.dirname(os.path.abspath(__file__))
-    excel_path = os.path.join(base_dir, "formulaire.xlsx")  # Chemin vers le fichier Excel
-    pdf_output_dir = os.path.join(base_dir, "pdf_output")   # Dossier de sortie pour les PDF
-
-    # Création du dossier de sortie s'il n'existe pas
-    os.makedirs(pdf_output_dir, exist_ok=True)
-
+    excel_template_path = os.path.join(base_dir, "formulaire.xlsx")  # Chemin vers le modèle Excel
+    odm_pdf_dir = os.path.join(base_dir, "odm_pdf")  # Dossier de sortie pour les PDF
+    odm_excel_dir = os.path.join(base_dir, "odm_excel")  # Dossier de sortie pour les Excel
+    
+    # Création des dossiers de sortie s'ils n'existent pas
+    os.makedirs(odm_pdf_dir, exist_ok=True)
+    os.makedirs(odm_excel_dir, exist_ok=True)
+    
+    # Nom de fichier basé sur les informations de session (avec dates formatées)
+    file_basename = f"ODM_{prenom}_{nom}_{date_debut_formatted}_{date_fin_formatted}"
+    excel_filename = f"{file_basename}.xlsx"
+    pdf_filename = f"{file_basename}.pdf"
+    
+    # Chemin complet pour les nouveaux fichiers
+    excel_output_path = os.path.join(odm_excel_dir, excel_filename)
+    
     # Génération de l'Excel et du PDF
     excel = Excel()
     try:
-        # Appel de la méthode Comp_Excel avec les données de session
+        # Copier d'abord le modèle Excel vers le nouveau fichier dans odm_excel
+        shutil.copy2(excel_template_path, excel_output_path)
+        
+        # Appel de la méthode Comp_Excel avec les données de session et le nouveau chemin Excel
         excel.Comp_Excel(
             session['nom'], session['prenom'], session['usine'], session['client'],
-            session['contact'], session['telephone_contact'], session['email_contact'], 
-            session['date_debut'], session['date_fin'], session['matricule'], 
-            session['charge'], session['adresse'], session['mail_charge'], 
-            session['telephone_charge'], session['affaire'], session['adresse_usine'], 
-            session['mission'], session['immatriculation'], session['zone']
+            session['contact'], session['telephone_contact'], session['email_contact'],
+            session['date_debut'], session['date_fin'], session['matricule'],
+            session['charge'], session['adresse'], session['mail_charge'],
+            session['telephone_charge'], session['affaire'], session['adresse_usine'],
+            session['mission'], session['immatriculation'], session['zone'],
+            excel_output_path  # Passer le nouveau chemin d'Excel
         )
-
-        # Conversion en PDF
-        pdf_path = excel.PDF(excel_path, pdf_output_dir)
-
+        
+        # Conversion en PDF directement dans le dossier odm_pdf
+        pdf_path = excel.PDF(excel_output_path, odm_pdf_dir)
+        
         # Vérification que le chemin du PDF est valide
         if pdf_path is None:
             return "Erreur : le chemin du fichier PDF n'a pas été généré.", 500
-
+            
         # Vérification que le fichier PDF existe
         if not os.path.isfile(pdf_path):
             return "Erreur : le fichier PDF n'a pas été généré ou n'est pas accessible.", 500
-
-        # Création d'un nom de fichier basé sur les informations de session
-        nom_fichier = f"ODM_{prenom}_{nom}_{date_debut}_{date_fin}.pdf"
-
+            
         # Envoi du fichier PDF pour téléchargement
-        return send_file(pdf_path, download_name=nom_fichier, as_attachment=True)
-
+        return send_file(pdf_path, download_name=pdf_filename, as_attachment=True)
+        
     except Exception as e:
         # Gestion des erreurs
         print(f"Erreur lors de la génération du PDF : {str(e)}")
@@ -645,6 +798,7 @@ def download_pdf():
 
 
 @app.route('/droits', methods=['GET', 'POST'])
+@login_required  # Ajout de la protection par login
 def droits():
     form = ConfigFormDroits(user_username='', droit_admin='')
     if form.validate_on_submit():
@@ -654,31 +808,3 @@ def droits():
      
     return render_template('droits.html', form=form)
 
-@app.route('/maquette', methods=['GET', 'POST'])
-def maquette():
-
-    return render_template('maquette.html')
-
-@app.route("/gps", methods=["GET", "POST"])
-def gps():
-    gps = class_gps()
-    if request.method == "POST":
-        print(f"Request method: {request.method}")  # Vérifier la méthode de la requête
-        adresse1 = request.form.get("adresse1")  # Utiliser .get() pour éviter le KeyError
-        adresse2 = request.form.get("adresse2")  # Utiliser .get() pour éviter le KeyError
-        
-        if not adresse1 or not adresse2:
-            print("Erreur: Adresse manquante")
-            return render_template("gps.html", erreur="Les deux adresses doivent être remplies.")
-        
-        print(f"Adresse 1 : {adresse1}, Adresse 2 : {adresse2}")
-        
-        # Appel de la fonction calculate_distance pour récupérer la distance entre les deux adresses
-        distance = gps.calculate_distance(adresse1, adresse2)
-        
-        if distance is not None:
-            return render_template("gps.html", adresse1=adresse1, adresse2=adresse2, distance=distance)
-        else:
-            return render_template("gps.html", adresse1=adresse1, adresse2=adresse2, erreur="Impossible de calculer la distance.")
-    
-    return render_template("gps.html")  # Rend le formulaire si la méthode est GET
