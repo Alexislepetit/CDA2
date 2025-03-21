@@ -152,3 +152,15 @@ input[type="submit"]:hover {
   margin-bottom: 10px;
 }
 
+
+.domain {
+  margin-left: 5px; /* Petit espacement entre l'input et le domaine */
+  margin-right: 15px;
+  font-size: 25px;
+  color: #555;
+  padding: 8px;
+  background-color: #f1f1f1;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  white-space: nowrap; /* Empêche le domaine de se casser en ligne */
+}

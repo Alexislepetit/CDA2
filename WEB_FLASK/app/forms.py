@@ -79,6 +79,7 @@ class ConfigFormnewUser(FlaskForm):
     admin = SelectField('Administrateur ?', choices=[('oui', 'Oui'), ('non', 'Non')], validators=[DataRequired()])
     submit = SubmitField('Valider')
 
+  
 
 class ConfigFormDroits(FlaskForm):
     user_username = StringField('Utilisateur', validators=[DataRequired()])

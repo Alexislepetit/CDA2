@@ -4,40 +4,178 @@
     <li><a href="/view_bdd">Base de données</a></li>
     <li><a href="/create_odm">Création ODM</a></li>
     <li><a href="/view_odm" class="page-active">Consulter ODM</a></li>
+    <li><a href="/gestion_user">Gestion utilisateurs</a></li>
 {% endblock %}
 
 {% block content %}
-    <h1>Consulter ODM</h1>
-    <div class="sorting-options">
-        <a href="/view_odm?sort_by=date">Trier par Date</a> |
-        <a href="/view_odm?sort_by=name">Trier par Nom</a> |
-        <a href="/view_odm?sort_by=usine">Trier par Usine</a>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/view_odm.css') }}">
+<h1>Gestion des fichiers ODM</h1>
+
+<!-- Filtres -->
+<div class="controls">
+    <div class="dropdown">
+        <label for="year_filter">Année :</label>
+        <select id="year_filter" onchange="applyFilters()">
+            <option value="all">Toutes</option>
+            {% for year in years %}
+            <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>{{ year }}</option>
+            {% endfor %}
+        </select>
     </div>
-    <div class="table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th>Nom du Fichier</th>
-                    <th>Date de Modification</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for file in excel_files %}
-                    <tr>
-                        <td>{{ file['filename'] }}</td>
-                        <td>{{ file['modified'] }}</td>
-                        <td><a href="{{ file['path'] }}" class="download-btn">Télécharger</a></td>
-                    </tr>
-                {% endfor %}
-                {% for file in pdf_files %}
-                    <tr>
-                        <td>{{ file['filename'] }}</td>
-                        <td>{{ file['modified'] }}</td>
-                        <td><a href="{{ file['path'] }}" class="download-btn">Télécharger</a></td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+
+    <div class="dropdown">
+        <label for="month_filter">Mois :</label>
+        <select id="month_filter" onchange="applyFilters()">
+            <option value="all">Tous</option>
+            <option value="01">Janvier</option>
+            <option value="02">Février</option>
+            <option value="03">Mars</option>
+            <option value="04">Avril</option>
+            <option value="05">Mai</option>
+            <option value="06">Juin</option>
+            <option value="07">Juillet</option>
+            <option value="08">Août</option>
+            <option value="09">Septembre</option>
+            <option value="10">Octobre</option>
+            <option value="11">Novembre</option>
+            <option value="12">Décembre</option>
+        </select>
     </div>
+    
+    <div class="dropdown">
+        <label for="file_type">Filtrer par type :</label>
+        <select id="file_type" onchange="applyFilters()">
+            <option value="all">Tous</option>
+            <option value="pdf">PDF</option>
+            <option value="xlsx">Excel</option>
+        </select>
+    </div>
+
+    <!-- Champs de recherche par Code Affaire et Nom du fichier -->
+    <div class="dropdown">
+        <label for="filename_search">Rechercher par Nom du fichier :</label>
+        <input type="text" id="filename_search" placeholder="Nom du fichier" oninput="applyFilters()">
+    </div>
+    
+    <div class="dropdown">
+        <label for="affaire_search">Rechercher par Code Affaire :</label>
+        <input type="text" id="affaire_search" placeholder="Code Affaire" oninput="applyFilters()">
+    </div>
+</div>
+
+<!-- Tableau des fichiers -->
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>Nom du fichier</th>
+                <th>Date de début de mission</th>
+                <th>Code affaire</th>
+                <th>Type</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="fileTable">
+            {% for file in files %}
+            <tr class="file-row" data-type="{{ file['type'] }}" data-date="{{ file['date_iso'] }}" data-affaire="{{ file['affaire'] }}" data-filename="{{ file['filename'] }}">
+                <td>{{ file['filename'] }}</td>
+                <td>{{ file['date_iso'] if file['date_iso'] else 'Non disponible' }}</td>
+                <td>{{ file['affaire'] }}</td>
+                <td>{{ "Excel" if file['type'] == 'xlsx' else "PDF" }}</td>
+                <td class="action-cell">
+                    <a href="{{ url_for('download_file', folder='odm_excel' if file['type'] == 'xlsx' else 'odm_pdf', filename=file['filename']) }}" class="download-btn">Télécharger</a>
+                    
+                    <!-- Bouton de suppression -->
+                    <button type="button" class="delete-btn" onclick="confirmDelete('{{ url_for('delete_file') }}', '{{ file['path'] }}')">Supprimer</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- JavaScript pour le filtrage -->
+<script>
+    function applyFilters() {
+    let year = document.getElementById("year_filter").value;
+    let month = document.getElementById("month_filter").value;
+    let fileType = document.getElementById("file_type").value;
+    let affaireSearch = document.getElementById("affaire_search").value.toLowerCase();
+    let filenameSearch = document.getElementById("filename_search").value.toLowerCase();
+    let rows = document.querySelectorAll(".file-row");
+
+    rows.forEach(row => {
+        let fileDate = row.getAttribute("data-date"); // Format YYYY-MM-DD
+        let fileAffaire = row.getAttribute("data-affaire").toLowerCase();
+        let fileName = row.getAttribute("data-filename").toLowerCase();
+
+        if (!fileDate || fileDate === "0000-00-00") return; // Ignore les fichiers sans date
+        
+        let fileYear = fileDate.split("-")[0];
+        let fileMonth = fileDate.split("-")[1];
+        
+        // Assurer que les mois sont bien au format "01", "02", ..., "12"
+        if (fileMonth.length === 1) {
+            fileMonth = "0" + fileMonth;
+        }
+
+        let matchesYear = (year === "all" || fileYear === year);
+        let matchesMonth = (month === "all" || fileMonth === month);
+        let matchesType = (fileType === "all" || row.getAttribute("data-type") === fileType);
+        let matchesAffaire = (affaireSearch === "" || fileAffaire.includes(affaireSearch));
+        let matchesFilename = (filenameSearch === "" || fileName.includes(filenameSearch));
+
+        if (matchesYear && matchesMonth && matchesType && matchesAffaire && matchesFilename) {
+            row.style.display = "";
+        } else {
+            row.style.display = "none";
+        }
+    });
+}
+</script>
+
+<!-- Modal de confirmation de suppression -->
+<div id="deleteModal" class="modal">
+    <div class="modal-content">
+        <h2>Confirmation de suppression</h2>
+        <p>Êtes-vous sûr de vouloir supprimer cet élément ?</p>
+        <div class="modal-buttons">
+            <button id="cancelDelete" class="cancel-btn">Annuler</button>
+            <form id="deleteForm" method="POST">
+                <input type="hidden" name="file_path" id="filePath">
+                <button type="submit" class="confirm-delete-btn">Confirmer</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    // Fonction pour afficher le modal de confirmation de suppression
+    function confirmDelete(deleteUrl, filePath) {
+        const modal = document.getElementById('deleteModal');
+        const deleteForm = document.getElementById('deleteForm');
+        const filePathInput = document.getElementById('filePath');
+        
+        // Assigner l'URL de suppression et le chemin du fichier
+        filePathInput.value = filePath;
+        deleteForm.action = deleteUrl;
+        
+        // Afficher le modal
+        modal.style.display = 'flex';
+        
+        // Fermer le modal si on clique sur Annuler
+        document.getElementById('cancelDelete').onclick = function() {
+            modal.style.display = 'none';
+        };
+        
+        // Fermer le modal si on clique en dehors du modal
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        };
+    }
+</script>
+
 {% endblock %}

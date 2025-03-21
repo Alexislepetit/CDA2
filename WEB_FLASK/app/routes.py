@@ -10,7 +10,7 @@ import os
 from app.gps import class_gps
 from app.login import utilisateur
 import shutil
-from app.historique_odm import historique_ODM
+from app.historique_odm import historique_odm
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -107,6 +107,7 @@ def view_bdd():
             'id_personne': 'ID',
             'nom': 'Nom',
             'prenom': 'Prénom',
+            'matricule': 'Matricule',
             'email': 'Email',
             'telephone': "Téléphone",
             'immatriculation' : 'Immatriculation',
@@ -232,52 +233,60 @@ def format_date(value, format='%d-%m-%Y %H:%M'):
 @app.route('/view_odm')
 @login_required
 def view_odm():
-    odm = historique_ODM()
-
-    # Récupérer le chemin absolu vers le répertoire "odm_excel" et "odm_pdf" dans le dossier "app"
-    base_dir = os.path.dirname(os.path.abspath(__file__))  # Récupère le répertoire actuel (app)
-    excel_directory = os.path.join(base_dir, "odm_excel")  # Chemin vers "odm_excel"
-    pdf_directory = os.path.join(base_dir, "odm_pdf")      # Chemin vers "odm_pdf"
-
-    # Obtenir les fichiers dans les répertoires Excel et PDF
-    excel_files = odm.get_files_in_directory(excel_directory)
-    pdf_files = odm.get_files_in_directory(pdf_directory)
+    odm = historique_odm()
     
-    # Formater les dates dans le format souhaité
-    for file in excel_files:
-        # Convertir la timestamp en datetime avant d'appliquer strftime
-        file['modified'] = datetime.fromtimestamp(file['modified']).strftime('%d-%m-%Y %H:%M')
+    # Récupérer les fichiers Excel et PDF
+    excel_files = odm.get_files(odm.odm_directory_excel)
+    pdf_files = odm.get_files(odm.odm_directory_pdf)
 
-    for file in pdf_files:
-        # Convertir la timestamp en datetime avant d'appliquer strftime
-        file['modified'] = datetime.fromtimestamp(file['modified']).strftime('%d-%m-%Y %H:%M')
+    # Fusionner les listes pour un tri commun
+    all_files = excel_files + pdf_files
 
-    # Passer les fichiers formatés à la template
-    return render_template('view_odm.html', excel_files=excel_files, pdf_files=pdf_files)
+    # Générer une liste unique d'années pour le filtre
+    years = sorted(set(file['year'] for file in all_files if file['year']), reverse=True)
 
+    # Filtrage par année, mois et type (paramètres GET)
+    selected_year = request.args.get('year', 'all')
+    selected_month = request.args.get('month', 'all')
+    selected_type = request.args.get('type', 'all')
 
+    filtered_files = [
+        file for file in all_files
+        if (selected_year == "all" or file['year'] == selected_year) and
+           (selected_month == "all" or file['month'] == selected_month) and
+           (selected_type == "all" or file['type'] == selected_type)
+    ]
 
-@app.route('/recuperer_pdf/<filename>')
+    return render_template('view_odm.html', files=filtered_files, years=years, selected_year=selected_year, selected_month=selected_month, selected_type=selected_type)
+
+@app.route('/delete_file', methods=['POST'])
 @login_required
-def recuperer_pdf(filename):
-    pdf_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'odm_pdf')
-    file_path = os.path.join(pdf_dir, filename)
+def delete_file():
+    # Récupérer le chemin du fichier à supprimer
+    file_path = request.form['file_path']
+    if os.path.exists(file_path):
+        os.remove(file_path)  # Supprimer le fichier
+    return redirect(url_for('view_odm'))  # Rediriger vers la page des ODM après la suppression
+
+
+@app.route('/download/<folder>/<filename>')
+@login_required
+def download_file(folder, filename):
+    base_dir = os.path.dirname(os.path.abspath(__file__))  # Dossier "app"
     
-    if os.path.isfile(file_path):
+    # Vérifier si le dossier est valide (odm_excel ou odm_pdf)
+    if folder not in ['odm_excel', 'odm_pdf']:
+        return "Dossier invalide", 400  # Mauvaise requête
+    
+    file_path = os.path.join(base_dir, folder, filename)
+
+    # Vérifier si le fichier existe avant d'essayer de l'envoyer
+    if os.path.exists(file_path):
         return send_file(file_path, as_attachment=True)
     else:
-        return "Le fichier n'existe pas.", 404
+        return "Fichier introuvable", 404  # Not found
     
-@app.route('/recuperer_excel/<filename>')
-@login_required
-def recuperer_excel(filename):
-    excel_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'odm_excel')
-    file_path = os.path.join(excel_dir, filename)
-    
-    if os.path.isfile(file_path):
-        return send_file(file_path, as_attachment=True)
-    else:
-        return "Le fichier n'existe pas.", 404
+
 
 
 
@@ -737,6 +746,7 @@ def download_pdf():
     prenom = session.get('prenom')
     date_debut = session.get('date_debut')
     date_fin = session.get('date_fin')
+    affaire = session.get('affaire')
     
     # Formater les dates pour le nom de fichier (remplacer les / par des -)
     date_debut_formatted = date_debut.replace('/', '-')
@@ -753,7 +763,7 @@ def download_pdf():
     os.makedirs(odm_excel_dir, exist_ok=True)
     
     # Nom de fichier basé sur les informations de session (avec dates formatées)
-    file_basename = f"ODM_{prenom}_{nom}_{date_debut_formatted}_{date_fin_formatted}"
+    file_basename = f"ODM_{prenom}_{nom}_{date_debut_formatted}_{date_fin_formatted}_{affaire}"
     excel_filename = f"{file_basename}.xlsx"
     pdf_filename = f"{file_basename}.pdf"
     

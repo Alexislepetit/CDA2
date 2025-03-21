@@ -34,7 +34,10 @@ class Requete_BDD:
         if form.validate_on_submit():
             self.connexion()
             user = form.user_username.data
+            #user = f"{form.user_username.data}@spie.com"
             password = form.user_password.data
+            print(user)
+            print(user)
             self.mycursor.execute("USE ODM")
             requete = "SELECT password FROM utilisateurs WHERE email = %s "
             self.mycursor.execute(requete,(user,))
@@ -302,9 +305,9 @@ class Requete_BDD:
     def insert_user(self):
         self.connexion()
         form = ConfigFormnewUser(user_utilisateur='', user_password='', user_password2='', admin='')
-        utilisateur = form.user_utilisateur.data
         password = form.user_password.data
         admin=form.admin.data
+        utilisateur = f"{form.user_utilisateur.data}@spie.com"
         self.mycursor.execute("USE ODM")
         new = "INSERT INTO utilisateurs (email, password, admin) VALUES (%s, %s, %s)"
         val = (utilisateur, password, admin)
@@ -1046,59 +1049,5 @@ class Requete_BDD:
         column_names = [i[0] for i in self.mycursor.description]
         
         return user, column_names
-    '''
-    def coordonnees_agence(self, nom):
-        self.connexion()
-
-        self.mycursor.execute("USE ODM")
-        self.mycursor.execute("SELECT agence FROM personnes WHERE nom = %s", (nom,))
-        agence = self.mycursor.fetchone()
-        agence = agence[0]
-
-        self.mycursor.execute("USE ODM")
-        self.mycursor.execute("SELECT Latitude, Longitude FROM agences WHERE ville = %s", (agence,))
-        
-        # Récupérer toutes les lignes
-        coordonnees_agence = self.mycursor.fetchall()
-
-    
-        return coordonnees_agence[0]
-     
-    def coordonnees_usine(self, nom):
-        self.connexion()
-
-        self.mycursor.execute("USE ODM")
-        self.mycursor.execute("SELECT agence FROM personnes WHERE nom = %s", (nom,))
-        agence = self.mycursor.fetchone()
-        agence = agence[0]
-
-        self.mycursor.execute("USE ODM")
-        self.mycursor.execute("SELECT Latitude, Longitude FROM agences WHERE ville = %s", (agence,))
-        
-        # Récupérer toutes les lignes
-        coordonnees_agence = self.mycursor.fetchall()
-
-    
-        return coordonnees_agence[0]
-   
-    def get_coordinates(self, address):
-        url = "https://nominatim.openstreetmap.org/search"
-        params = {
-            "q": address,
-            "format": "json",
-            "addressdetails": 1,
-            "limit": 1
-        }
-        headers = {
-            "User-Agent": "MyGeocodingApp (contact@example.com)"  # Remplacez par votre email
-        }
-        response = requests.get(url, params=params, headers=headers)
-        if response.ok and response.json():
-            location = response.json()[0]
-            return float(location["lat"]), float(location["lon"])
-        else:
-            return None
-    '''
-    
 
 

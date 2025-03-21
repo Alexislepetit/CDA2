@@ -96,6 +96,7 @@ class Excel:
             print("Échec de la conversion. Erreur:", e.stderr)
             return None
 
+
     def date(self):
         # Charger le fichier Excel
         file_path = os.path.abspath("app/formulaire.xlsx")

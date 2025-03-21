@@ -15,21 +15,29 @@
 <h1>Création d'un utilisateur</h1>
 <form action="{{ url_for('add_user') }}" method="POST" novalidate>
     {{ form.hidden_tag() }}
+    
     <p>
         {{ form.user_utilisateur.label }}<br>
-        {{ form.user_utilisateur(class="input-field", id="user_username", placeholder="Utilisateur", size=16) }}<br>
+        <!-- Conteneur avec flexbox pour aligner l'input et @spie.com à droite -->
+        <div class="input-container">
+            <input type="text" id="user_utilisateur" name="user_utilisateur" class="input-field" placeholder="Nom d'utilisateur" size="16" value="{{ form.user_utilisateur.data }}">
+            <span class="domain">@spie.com</span>
+        </div>
     </p>
+    
     <p>
         {{ form.user_password.label }}<br>
         {{ form.user_password(class="input-field", id="user_password", placeholder="Mot de passe", size=16) }}<br>
     </p>
+    
     <p>
         {{ form.user_password2.label }}<br>
-        {{ form.user_password2(class="input-field", id="user_password", placeholder="Mot de passe", size=16) }}<br>
+        {{ form.user_password2(class="input-field", id="user_password", placeholder="Confirmer le mot de passe", size=16) }}<br>
     </p>
     {% if not form.user_password.data == form.user_password2.data and form.user_password2.data %}
         <p class="error">Les mots de passe ne correspondent pas.</p>
     {% endif %}
+    
     <p>
         {{ form.admin.label }}<br>
         {{ form.admin(class="form-control") }}
